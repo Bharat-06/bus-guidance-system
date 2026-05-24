@@ -1,5 +1,5 @@
 package com.team10;
-
+    
 
 public class Bus {
     private String busID;
@@ -7,6 +7,7 @@ public class Bus {
     private double fuelLevel;
     private String fuelType; // Diesel, Hybrid, Electricity
 
+    //constructors
     public Bus(String busID, int capacity, double fuelLevel, String fuelType) {
         this.busID = busID;
         this.capacity = capacity;
@@ -25,6 +26,21 @@ public class Bus {
     }
     public String getFuelType(){
         return fuelType;
+    }
+
+    // validating busID
+    public static boolean validBusID(String id) {
+        if (id == null || id.length() != 8){
+            return false;
+        }
+        char[] chars = id.toCharArray();
+        for (int i = 0; i < chars.length; i++) {
+            char c = chars[i];
+            if (!Character.isDigit(c)){
+                return false;
+            }
+        }
+        return true;
     }
 
 }
