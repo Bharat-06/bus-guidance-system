@@ -43,4 +43,15 @@ public class Bus {
         return true;
     }
 
+
+    //validate fuel type
+    public static boolean validFuelType(String fuelType){
+        if (fuelType.equals(null)){
+            return false;
+        }
+        else if (fuelType.equals("Diesel")|| fuelType.equals("Hybrid")|| fuelType.equals("Electricity")){
+            return true;
+        }
+        return false;
+    }
 }
