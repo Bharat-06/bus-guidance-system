@@ -6,28 +6,46 @@ import static org.junit.jupiter.api.Assertions.*;
 
 public class DriverTest {
 
-    // ─────────────────────────────────────────────
+    
     // D1: Driver ID Tests
-    // ─────────────────────────────────────────────
-
+    
     @Test
     void D1_TC1_validDriverIDShouldPass() {
         // Valid: 10 chars, first 2 digits in 2-9, at least 2 special chars in pos 3-8, last 2 uppercase
         assertTrue(Driver.isValidDriverID("23@#abcdAB"));
     }
-    /**
+  
     @Test
-    void D1_TC2_duplicateDriverIDShouldBeRejected() {
-        // Adding two drivers with the same driverID — second should fail
-        Driver d1 = new Driver("23@#abcdAB", "Alice", 3, "Light",
-                "12|Main|Melbourne|VIC|Australia", "10-05-1990");
+void D1_TC2_duplicateDriverIDShouldBeRejected() {
 
-        assertThrows(IllegalArgumentException.class, () -> {
-            new Driver("23@#abcdAB", "Bob", 2, "Light",
-                    "5|High|Sydney|NSW|Australia", "20-03-1995");
-        });
-    }
-    **/
+    DriverRepository repo =
+            new DriverRepository("test-drivers.txt");
+
+    Driver d1 = new Driver(
+            "23@#abcdAB",
+            "Alice",
+            3,
+            "Light",
+            "12|Main|Melbourne|VIC|Australia",
+            "10-05-1990"
+    );
+
+    Driver d2 = new Driver(
+            "23@#abcdAB",
+            "Bob",
+            2,
+            "Light",
+            "5|High|Sydney|NSW|Australia",
+            "20-03-1995"
+    );
+
+    repo.add(d1);
+
+    assertThrows(IllegalArgumentException.class, () -> {
+        repo.add(d2);
+    });
+}
+   
     @Test
     void D1_TC3_idTooShortShouldFail() {
         // 8 chars — must be exactly 10
@@ -52,10 +70,9 @@ public class DriverTest {
         assertFalse(Driver.isValidDriverID("23abcdefAB"));
     }
 
-    // ─────────────────────────────────────────────
+    
     // D2: Address Format Tests
-    // ───────────────────────────────────────────── 
-
+     
     @Test
     void D2_TC1_validAddressShouldPass() {
         assertTrue(Driver.isValidAddress("12|Main St|Sydney|NSW|Australia"));
@@ -73,10 +90,9 @@ public class DriverTest {
         assertFalse(Driver.isValidAddress("12 Main St Sydney NSW Australia"));
     }
 
-    // ─────────────────────────────────────────────
+    
     // D3: Birthdate Format Tests
-    // ─────────────────────────────────────────────
-
+    
     @Test
     void D3_TC1_validBirthdateShouldPass() {
         assertTrue(Driver.isValidBirthdate("15-06-1990"));
@@ -94,10 +110,9 @@ public class DriverTest {
         assertFalse(Driver.isValidBirthdate("32-13-2000"));
     }
 
-    // ─────────────────────────────────────────────
+    
     // D4: License Update Restriction Tests
-    // ─────────────────────────────────────────────
-
+    
     @Test
     void D4_TC1_licenseUpdateAllowedUnder10YearsExperience() {
         // 8 years experience — license change from Light to Medium should succeed
@@ -127,10 +142,9 @@ public class DriverTest {
                 () -> d.update(null, null, null, "Light", null, null));
     }
 
-    // ─────────────────────────────────────────────
+    
     // D5: Immutable Fields Tests
-    // ─────────────────────────────────────────────
-
+    
     @Test
     void D5_TC1_driverIDCannotBeUpdated() {
         Driver d = new Driver("23@#abcdAB", "Alice", 5, "Light",
