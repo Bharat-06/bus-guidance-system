@@ -1,5 +1,8 @@
 package com.team10;
-    
+
+import java.time.LocalDate;
+import java.time.Period;
+import java.time.format.DateTimeFormatter;
 
 public class Bus {
     private String busID;
@@ -53,5 +56,40 @@ public class Bus {
             return true;
         }
         return false;
+    }
+
+
+    // checking driver age to see if they can drive specific bus
+    public static boolean isDriverAgeValidForBus(String birthdate, int capacity) {
+
+    DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
+
+    try {
+        LocalDate dob = LocalDate.parse(birthdate, formatter);
+        int age = Period.between(dob, LocalDate.now()).getYears();
+        if (age > 50 && capacity >= 50) {
+            return false;
+        }
+        return true;
+    } 
+    catch (Exception e) {
+        return false;
+    }
+}
+
+    // check if driver can drive electric bus
+    public static boolean isDriverExperienceValidForElectric(int experienceYears, String fuelType) {
+        if (fuelType.equals("Electricity") && experienceYears < 5){
+            return false;
+        }
+        return true;
+    }
+
+    // drivers with heavy or public transport license operating electric and hybrid buses
+    public static boolean isLicenseValidForBus(String licenseType, String fuelType) {
+        if (fuelType.equals("Electricity") || fuelType.equals("Hybrid")) {
+            return licenseType.equals("Heavy") || licenseType.equals("PublicTransport");
+        }
+        return true;
     }
 }
