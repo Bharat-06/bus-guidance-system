@@ -92,4 +92,8 @@ public class Bus {
         }
         return true;
     }
+
+        public static boolean capacityUpdate(int oldCapacity, int newCapacity) {
+        return newCapacity <= oldCapacity;
+    }
 }
