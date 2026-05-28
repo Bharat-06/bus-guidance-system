@@ -10,35 +10,21 @@ import java.util.List;
 
 public class DriverRepository {
 
-    private final String filePath;
+    private static final Path FILE_PATH =
+        Paths.get("drivers.txt");
     private static final int FIELD_COUNT = 6;
 
 
-    public DriverRepository(String filePath) {
-        this.filePath = filePath;
-        initialiseFile();
-    }
 
     
-    private void initialiseFile() {
-        try {
-            File file = new File(filePath);
-            if (file.getParentFile() != null) {
-                file.getParentFile().mkdirs();
-            }
-            if (!file.exists()) {
-                file.createNewFile();
-            }
-        } catch (IOException e) {
-            throw new RuntimeException("Could not initialise driver storage file: " + filePath, e);
-        }
-    }
+
 
     // Add Driver
-   
     // Adds a new driver to the TXT file and rejects duplicate driverIDs.
     
     public void add(Driver driver) {
+
+        
         if (driver == null) {
             throw new IllegalArgumentException("Driver cannot be null.");
         }
@@ -50,9 +36,13 @@ public class DriverRepository {
         }
 
         // append new driver record to file
-        try (BufferedWriter writer = new BufferedWriter(new FileWriter(filePath, true))) {
-            writer.write(serialise(driver));
-            writer.newLine();
+        try {
+            Files.writeString(
+                    FILE_PATH,
+                    serialise(driver) + System.lineSeparator(),
+                    StandardOpenOption.CREATE,
+                    StandardOpenOption.APPEND
+            );
         } catch (IOException e) {
             throw new RuntimeException("Failed to add driver to file.", e);
         }
@@ -127,7 +117,12 @@ public class DriverRepository {
     // Reads all lines from the TXT file.
     private List<String> readAllLines() {
         try {
-            return Files.readAllLines(Paths.get(filePath));
+
+            if (!Files.exists(FILE_PATH)) {
+                return new ArrayList<>();
+            }
+            
+            return Files.readAllLines(FILE_PATH);
         } catch (IOException e) {
             throw new RuntimeException("Failed to read driver storage file.", e);
         }
@@ -137,15 +132,16 @@ public class DriverRepository {
     // Overwrites the TXT file with the updated details.
 
     private void writeAllLines(List<String> lines) {
-        try (BufferedWriter writer = new BufferedWriter(new FileWriter(filePath, false))) {
-            for (String line : lines) {
-                if (!line.trim().isEmpty()) {
-                    writer.write(line);
-                    writer.newLine();
-                }
-            }
+        try {
+            Files.write(
+                    FILE_PATH,
+                    lines,
+                    StandardOpenOption.CREATE,
+                    StandardOpenOption.TRUNCATE_EXISTING
+            );
         } catch (IOException e) {
-            throw new RuntimeException("Failed to write to driver storage file.", e);
+            throw new RuntimeException(
+                    "Failed to write to driver storage file.", e);
         }
     }
 

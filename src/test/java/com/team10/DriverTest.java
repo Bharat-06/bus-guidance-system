@@ -4,6 +4,10 @@ import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+
 public class DriverTest {
 
     
@@ -15,36 +19,38 @@ public class DriverTest {
         assertTrue(Driver.isValidDriverID("23@#abcdAB"));
     }
   
+
     @Test
-void D1_TC2_duplicateDriverIDShouldBeRejected() {
+    void D1_TC2_duplicateDriverIDShouldBeRejected() throws IOException {
 
-    DriverRepository repo =
-            new DriverRepository("test-drivers.txt");
+        Files.deleteIfExists(Paths.get("drivers.txt"));
 
-    Driver d1 = new Driver(
-            "23@#abcdAB",
-            "Alice",
-            3,
-            "Light",
-            "12|Main|Melbourne|VIC|Australia",
-            "10-05-1990"
-    );
+        DriverRepository repo = new DriverRepository();
 
-    Driver d2 = new Driver(
-            "23@#abcdAB",
-            "Bob",
-            2,
-            "Light",
-            "5|High|Sydney|NSW|Australia",
-            "20-03-1995"
-    );
+        Driver d1 = new Driver(
+                "23@#abcdAB",
+                "Alice",
+                3,
+                "Light",
+                "12|Main|Melbourne|VIC|Australia",
+                "10-05-1990"
+        );
 
-    repo.add(d1);
+        Driver d2 = new Driver(
+                "23@#abcdAB",
+                "Bob",
+                2,
+                "Light",
+                "5|High|Sydney|NSW|Australia",
+                "20-03-1995"
+        );
 
-    assertThrows(IllegalArgumentException.class, () -> {
-        repo.add(d2);
-    });
-}
+        repo.add(d1);
+
+        assertThrows(IllegalArgumentException.class, () -> {
+            repo.add(d2);
+        });
+    }
    
     @Test
     void D1_TC3_idTooShortShouldFail() {
