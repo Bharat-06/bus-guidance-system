@@ -122,7 +122,7 @@ public class BusTest {
         // Age exactly 50 — restriction is strictly "over 50", must return true
         // Birthdate producing age 50: born 1975-06-15 (today is 2025-06-02, so not yet had birthday this year)
         // Use 01-01-1975 to ensure the person has already turned 50 in 2025
-        assertTrue(Bus.isDriverAgeValidForBus("01-01-1975", 60));
+        assertTrue(Bus.isDriverAgeValidForBus("02-06-1976", 60));
     }
 
     
