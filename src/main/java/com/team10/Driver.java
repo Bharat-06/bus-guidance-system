@@ -1,6 +1,7 @@
 package com.team10;
 
 import java.time.LocalDate;
+import java.time.Period;
 import java.time.format.DateTimeFormatter;
 
 
@@ -10,7 +11,6 @@ import java.time.format.DateTimeFormatter;
 
 public class Driver {
 
-    // ─── Fields ─────────────────────────────────────────────
 
     private String driverID;      
     private String name;           
@@ -186,14 +186,16 @@ public class Driver {
         return false;
     }
 
-    public int getAge() {
+    public static int getAge(String birthdate, LocalDate today) {
         DateTimeFormatter fmt = DateTimeFormatter.ofPattern("dd-MM-yyyy");
         LocalDate dob = LocalDate.parse(birthdate, fmt);
-
-        LocalDate now = LocalDate.now();
-        return now.getYear() - dob.getYear()
-                - (now.getDayOfYear() < dob.getDayOfYear() ? 1 : 0);
+        return Period.between(dob, today).getYears();
     }
+
+    public int getAge() {
+        return getAge(this.birthdate, LocalDate.now());
+    }
+    
 
     // Getters
     public String getDriverID() { return driverID; }

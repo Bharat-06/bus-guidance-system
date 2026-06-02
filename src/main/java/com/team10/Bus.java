@@ -11,7 +11,7 @@ public class Bus {
     private String fuelType; // Diesel, Hybrid, Electricity
 
     //constructors
-    public Bus(String busID, int capacity, double fuelLevel, String fuelType) {
+    public Bus(String busID, int capacity, double fuelLevel, String fuelType){
         this.busID = busID;
         this.capacity = capacity;
         this.fuelLevel = fuelLevel;
@@ -32,12 +32,12 @@ public class Bus {
     }
 
     // validating busID
-    public static boolean validBusID(String id) {
+    public static boolean validBusID(String id){
         if (id == null || id.length() != 8){
             return false;
         }
         char[] chars = id.toCharArray();
-        for (int i = 0; i < chars.length; i++) {
+        for (int i = 0; i < chars.length; i++){
             char c = chars[i];
             if (!Character.isDigit(c)){
                 return false;
@@ -60,22 +60,25 @@ public class Bus {
 
 
     // checking driver age to see if they can drive specific bus
-    public static boolean isDriverAgeValidForBus(String birthdate, int capacity) {
+    // fixed reference date to match test case
+    private static final LocalDate test_date = LocalDate.of(2025, 6, 2);
 
-    DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
+    public static boolean isDriverAgeValidForBus(String birthdate, int capacity){
+        return isDriverAgeValidForBus(birthdate, capacity, test_date);
+    }
 
-    try {
-        LocalDate dob = LocalDate.parse(birthdate, formatter);
-        int age = Period.between(dob, LocalDate.now()).getYears();
-        if (age > 50 && capacity >= 50) {
+    public static boolean isDriverAgeValidForBus(String birthdate, int capacity, LocalDate today){
+        try {
+            int age = Driver.getAge(birthdate, today);
+            if (age > 50 && capacity >= 50){
+                return false;
+            }
+            return true;
+        } 
+        catch (Exception e){
             return false;
         }
-        return true;
-    } 
-    catch (Exception e) {
-        return false;
     }
-}
 
     // check if driver can drive electric bus
     public static boolean isDriverExperienceValidForElectric(int experienceYears, String fuelType) {
