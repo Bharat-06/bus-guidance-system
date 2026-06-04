@@ -7,7 +7,7 @@ import java.time.format.DateTimeFormatter;
 
 
  //Driver class for Intelligent Bus Driver Guidance System.
- //Enforces conditions D1–D5.
+
 
 public class Driver {
 

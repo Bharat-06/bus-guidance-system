@@ -9,13 +9,12 @@ import static org.junit.jupiter.api.Assertions.*;
 
 public class BusTest {
 
-    
-    // Clear the buses.txt file before each test so
-    // duplicate-ID checks always start from a clean state.
+
+
     
 
     @BeforeEach
-    void clearBusFile() {
+    void setUp() {
         new File("buses.txt").delete();
     }
 
