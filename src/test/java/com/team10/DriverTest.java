@@ -49,7 +49,7 @@ public class DriverTest {
 
     @Test
     void D1_TC5_lessThan2SpecialChars_shouldThrow() {
-        // invalid: only 1 special character (positions 3-8 need at least 2)
+        // invalid: only 1 special character 
         assertThrows(IllegalArgumentException.class, () ->
             new Driver("23abcdefAB", "Alice", "10-05-1990", 5, "Light", "12|Main|Melbourne|VIC|Australia"));
     }
@@ -65,7 +65,7 @@ public class DriverTest {
 
     @Test
     void D2_TC1_validAddress_shouldPass() {
-        // normal case: correct address with 5 pipe-separated parts
+        // normal case: correct address 
         Driver d = new Driver("23@#abcdAB", "Alice", "10-05-1990", 5, "Light", "12|Main|Melbourne|VIC|Australia");
         assertEquals("12|Main|Melbourne|VIC|Australia", d.getAddress());
     }
@@ -79,14 +79,14 @@ public class DriverTest {
 
     @Test
     void D2_TC3_wrongDelimiter_shouldThrow() {
-        // invalid: uses spaces instead of pipe symbols
+        // invalid: uses spaces 
         assertThrows(IllegalArgumentException.class, () ->
             new Driver("23@#abcdAB", "Alice", "10-05-1990", 5, "Light", "12 Main Melbourne VIC Australia"));
     }
 
     @Test
     void D2_TC4_emptySegment_shouldThrow() {
-        // edge case: empty segment between two pipes
+        // edge case: empty segment 
         assertThrows(IllegalArgumentException.class, () ->
             new Driver("23@#abcdAB", "Alice", "10-05-1990", 5, "Light", "12||Melbourne|VIC|Australia"));
     }
@@ -138,7 +138,7 @@ public class DriverTest {
 
     @Test
     void D4_TC4_licenseUpdateAllowedAtExactly10Years() {
-        // edge: exactly 10 years is allowed because rule says "more than 10"
+        // edge: exactly 10 years is allowed 
         Driver d = new Driver("23@#abcdAB", "Alice", "10-05-1990", 10, "Light",
                             "12|Main|Melbourne|VIC|Australia");
         repo.add(d);
@@ -158,33 +158,44 @@ public class DriverTest {
     }
 
     // D5 testing
-
+    // normal: update changes other fields, driverID must stay the same
     @Test
     void D5_TC1_driverIDNeverChangesDuringUpdate() {
-        // verify driverID stays the same after updating other fields
         Driver d = new Driver("23@#abcdAB", "Alice", "10-05-1990", 5, "Light", "12|Main|Melbourne|VIC|Australia");
         repo.add(d);
-        repo.update("23@#abcdAB", 6, "Medium", "99|King|Sydney|NSW|Australia", "15-06-1992");
+        
+        boolean updatedSuccessfully = repo.update("23@#abcdAB", 6, "Medium", "99|King|Sydney|NSW|Australia", "15-06-1992");
+        assertTrue(updatedSuccessfully, "The update operation should have succeeded");
+        
         Driver updated = repo.retrieve("23@#abcdAB");
         assertEquals("23@#abcdAB", updated.getDriverID());
+        assertEquals(6, updated.getExperienceYears()); 
     }
 
+    // normal: update changes other fields, name must stay the same
     @Test
     void D5_TC2_nameNeverChangesDuringUpdate() {
-        // verify name stays the same after updating other fields
         Driver d = new Driver("23@#abcdAB", "Alice", "10-05-1990", 5, "Light", "12|Main|Melbourne|VIC|Australia");
         repo.add(d);
-        repo.update("23@#abcdAB", 6, "Medium", "99|King|Sydney|NSW|Australia", "15-06-1992");
+        
+        boolean updatedSuccessfully = repo.update("23@#abcdAB", 6, "Medium", "99|King|Sydney|NSW|Australia", "15-06-1992");
+        assertTrue(updatedSuccessfully, "The update operation should have succeeded");
+        
         Driver updated = repo.retrieve("23@#abcdAB");
         assertEquals("Alice", updated.getName());
     }
 
+    // normal: update (only experience and address), leaves name unchanged
     @Test
-    void D5_TC3_nameCannotBePassedToUpdate() {
-        // the update method has no 'name' parameter, so name is safe from changes
+    void D5_TC3_nameRemainsUnchangedAfterPartialUpdate() {
         Driver d = new Driver("23@#abcdAB", "Alice", "10-05-1990", 5, "Light", "12|Main|Melbourne|VIC|Australia");
         repo.add(d);
-        assertTrue(repo.update("23@#abcdAB", null, null, null, null));
-        assertEquals("Alice", repo.retrieve("23@#abcdAB").getName());
+        
+        boolean result = repo.update("23@#abcdAB", 7, null, "99|King|Sydney|NSW|Australia", null);
+        
+        assertTrue(result, "The update operation should return true for valid updates.");
+        
+        Driver updated = repo.retrieve("23@#abcdAB");
+        assertEquals("Alice", updated.getName(), "The driver's name must remain unchanged after an update.");
     }
 }

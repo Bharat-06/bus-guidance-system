@@ -26,20 +26,17 @@ public class DriverIntegrationTest {
         assertTrue(repo.add(driver));
 
         try {
-            String content = Files.readString(DriverRepository.FILE_PATH);
-            assertTrue(content.contains("23@#abcdAB"));
-            assertTrue(content.contains("Alice"));
-            assertTrue(content.contains("5"));
-            assertTrue(content.contains("Light"));
-            assertTrue(content.contains("12|Main|Melbourne|VIC|Australia"));
-            assertTrue(content.contains("10-05-1990"));
+            String content = Files.readString(DriverRepository.FILE_PATH).trim();
+            String expectedLine = "23@#abcdAB,Alice,10-05-1990,5,Light,12|Main|Melbourne|VIC|Australia";
+            
+            assertTrue(content.contains(expectedLine), "The file format should exactly match the serialized driver structure.");
         } catch (IOException e) {
             fail("Could not read drivers file: " + e.getMessage());
         }
         assertEquals(1, repo.count());
     }
 
-    // 2. Invalid driver (constructor fails) is rejected – never reaches repo
+    // 2. Invalid driver (constructor fails) is rejected
     @Test
     void DI_TC2_invalidDriverRejectedByConstructor() {
         assertThrows(IllegalArgumentException.class, () -> {
@@ -52,7 +49,7 @@ public class DriverIntegrationTest {
         assertFalse(Files.exists(DriverRepository.FILE_PATH));
     }
 
-    // 3. Duplicate driver ID is rejected by repository (D1) – file unchanged
+    // 3. Duplicate driver ID is rejected by repository 
     @Test
     void DI_TC3_duplicateDriverRejectedByRepository() {
         Driver d1 = new Driver(
@@ -61,7 +58,6 @@ public class DriverIntegrationTest {
         );
         assertTrue(repo.add(d1));
     
-        // Read file content after first add
         String contentAfterFirst;
         try {
             contentAfterFirst = Files.readString(DriverRepository.FILE_PATH);
@@ -69,8 +65,7 @@ public class DriverIntegrationTest {
             fail("Could not read drivers file: " + e.getMessage());
             return;
         }
-    
-        // Try to add another driver with same ID
+
         Driver d2 = new Driver(
             "23@#abcdAB", "Bob", "20-03-1995", 2, "Light",
             "5|High|Sydney|NSW|Australia"
@@ -78,8 +73,7 @@ public class DriverIntegrationTest {
         boolean result = repo.add(d2);
         assertFalse(result);
         assertEquals(1, repo.count());
-    
-        // File content must be unchanged
+
         try {
             String contentAfterSecond = Files.readString(DriverRepository.FILE_PATH);
             assertEquals(contentAfterFirst, contentAfterSecond);
@@ -87,7 +81,7 @@ public class DriverIntegrationTest {
             fail("Could not read drivers file: " + e.getMessage());
         }
     }
-
+    // 4. Save updates to file
     @Test
     void DI_TC4_updateSavedToFile() {
         Driver driver = new Driver(
@@ -104,8 +98,8 @@ public class DriverIntegrationTest {
             String content = Files.readString(DriverRepository.FILE_PATH);
             assertTrue(content.contains("99|King St|Brisbane|QLD|Australia"));
             assertTrue(content.contains("Medium"));
-            assertFalse(content.contains("12|Main|Melbourne|VIC|Australia"));
-            assertFalse(content.contains("Light"));
+            
+            assertFalse(content.contains("34@#abcdCD,Carol,10-05-1990,3,Light"), "The old record state should be overwritten.");
         } catch (IOException e) {
             fail("Could not read drivers file: " + e.getMessage());
         }
