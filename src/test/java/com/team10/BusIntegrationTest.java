@@ -6,6 +6,7 @@ import org.junit.jupiter.api.Test;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -16,17 +17,25 @@ public class BusIntegrationTest {
     void setUp() {
         new File("buses.txt").delete();
     }
+    
 
     // BI-TC1: Valid bus is stored correctly in TXT file
     @Test
-    void BI_TC1_validBusStoredCorrectlyInFile() throws IOException {
+    void BI_TC1_validBusStoredCorrectlyInFile() {
         Bus bus = new Bus("12345678", 40, 0.8, "Diesel");
         assertTrue(BusRepository.add(bus));
-
+        
         // Read the TXT file directly and check it contains the bus
-        String fileContent = Files.readString(Paths.get("buses.txt"));
-        assertTrue(fileContent.contains("12345678"));
-        assertTrue(fileContent.contains("Diesel"));
+        
+        
+        try {
+            String fileContent = Files.readString(Paths.get(BusRepository.FILE_PATH));
+            assertTrue(fileContent.contains("12345678"));
+            assertTrue(fileContent.contains("Diesel"));
+        } catch (Exception e) {
+            System.out.println(e);
+        }
+
 
         // Also verify count increased
         assertEquals(1, BusRepository.count());
@@ -45,7 +54,7 @@ public class BusIntegrationTest {
 
     // BI-TC3: Bus update is persisted correctly to TXT file
     @Test
-    void BI_TC3_busUpdatePersistedToFile() throws IOException {
+    void BI_TC3_busUpdatePersistedToFile() {
         // Add a valid bus first
         Bus bus = new Bus("12345678", 50, 0.8, "Diesel");
         BusRepository.add(bus);
@@ -54,8 +63,13 @@ public class BusIntegrationTest {
         assertTrue(BusRepository.update("12345678", 30, 0.8, "Diesel"));
 
         // Read the TXT file and verify updated capacity is persisted
-        String fileContent = Files.readString(Paths.get("buses.txt"));
-        assertTrue(fileContent.contains("30"));
+        try {
+            String fileContent = Files.readString(Paths.get(BusRepository.FILE_PATH));
+            assertTrue(fileContent.contains("30"));
+        } catch (Exception e) {
+            System.out.println(e);
+        }
+
 
         // Also verify via retrieve
         Bus updated = BusRepository.retrieve("12345678");

@@ -10,7 +10,7 @@ import java.util.List;
 
 public class DriverRepository {
 
-    private static final Path FILE_PATH =
+    public static final Path FILE_PATH =
         Paths.get("drivers.txt");
     private static final int FIELD_COUNT = 6;
 
@@ -22,17 +22,19 @@ public class DriverRepository {
     // Add Driver
     // Adds a new driver to the TXT file and rejects duplicate driverIDs.
     
-    public void add(Driver driver) {
+    public boolean add(Driver driver) {
 
         
         if (driver == null) {
-            throw new IllegalArgumentException("Driver cannot be null.");
+            System.out.println("Driver cannot be null");
+            return false;
         }
 
         // Ensures all drivers are unique
         if (retrieve(driver.getDriverID()) != null) {
-            throw new IllegalArgumentException(
+            System.out.println(
                     "D1: A driver with ID '" + driver.getDriverID() + "' already exists.");
+                    return false;
         }
 
         // append new driver record to file
@@ -44,8 +46,10 @@ public class DriverRepository {
                     StandardOpenOption.APPEND
             );
         } catch (IOException e) {
-            throw new RuntimeException("Failed to add driver to file.", e);
+            System.out.println("Failed to add driver to file: " + e);
+            return false;
         }
+        return true;
     }
 
     // Find a driver based on driver ID

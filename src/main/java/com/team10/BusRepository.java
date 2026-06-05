@@ -7,7 +7,7 @@ import java.util.List;
 
 public class BusRepository {
 
-    private static final String FILE_PATH = "buses.txt";
+    public static final String FILE_PATH = "buses.txt";
 
     
      // Loads all buses from the TXT file in busID|capacity|fuelLevel|fuelType format
@@ -61,7 +61,7 @@ public class BusRepository {
     //Saves all buses back into the TXT file.
     
     public static void saveBuses(List<Bus> buses){
-
+// fucked overrides bus for no dumb fucking reason
         try (BufferedWriter bufferedWriter = new BufferedWriter(new FileWriter(FILE_PATH, false))) {
 
             for (Bus b : buses){
@@ -125,7 +125,7 @@ public class BusRepository {
     //updating bus info
     public static boolean update(String busID, int newCapacity, double newFuelLevel, String newFuelType){
 
-        List<Bus> buses = busList();
+        List<Bus> buses = busList();//SHOULD COME FROM FILE LIST
 
         for (int i = 0; i < buses.size(); i++){
             Bus existingBus = buses.get(i);

@@ -28,27 +28,31 @@ public class Driver {
                   String licenseType, String address, String birthdate) {
 
         if (!isValidDriverID(driverID)) {
-            throw new IllegalArgumentException("Invalid driverID");
+            System.out.println("Invalid driverID");
+            driverID = "12345678";
         }
 
         if (name == null || name.trim().isEmpty()) {
-            throw new IllegalArgumentException("Invalid name");
+            System.out.println("Invalid name");
+            name = "noname";
         }
 
         if (experienceYears < 0) {
-            throw new IllegalArgumentException("Invalid experience");
+            System.out.println("Invalid experience");
+            experienceYears = 0;
         }
 
         if (!isValidLicenseType(licenseType)) {
-            throw new IllegalArgumentException("Invalid license type");
+            System.out.println("Invalid license type");
+        
         }
 
         if (!isValidAddress(address)) {
-            throw new IllegalArgumentException("Invalid address");
+            System.out.println("Invalid address");
         }
 
         if (!isValidBirthdate(birthdate)) {
-            throw new IllegalArgumentException("Invalid birthdate");
+            System.out.println("Invalid birthdate");
         }
 
         this.driverID = driverID;
@@ -61,23 +65,26 @@ public class Driver {
 
     // Update 
 
-    public void update(String newDriverID, String newName, Integer newExperienceYears,
+    public boolean update(String newDriverID, String newName, Integer newExperienceYears,
                        String newLicenseType, String newAddress, String newBirthdate) {
 
         // D5: immutable fields
         if (newDriverID != null && !newDriverID.equals(this.driverID)) {
-            throw new IllegalArgumentException("D5: driverID cannot be changed");
+            System.out.println("D5: driverID cannot be changed");
+            return false;
         }
 
         if (newName != null && !newName.equals(this.name)) {
-            throw new IllegalArgumentException("D5: name cannot be changed");
+            System.out.println("D5: name cannot be changed");
+            return false;
         }
 
         // Update experience first safely
         int updatedExperience = this.experienceYears;
         if (newExperienceYears != null) {
             if (newExperienceYears < 0) {
-                throw new IllegalArgumentException("Invalid experience");
+                System.out.println("Invalid experience");
+                return false;
             }
             updatedExperience = newExperienceYears;
         }
@@ -86,12 +93,12 @@ public class Driver {
         if (newLicenseType != null) {
             if (updatedExperience > 10 &&
                     !newLicenseType.equals(this.licenseType)) {
-                throw new IllegalArgumentException(
+                System.out.println(
                         "D4: cannot change license after 10 years experience");
             }
 
             if (!isValidLicenseType(newLicenseType)) {
-                throw new IllegalArgumentException("Invalid license type");
+                System.out.println("Invalid license type");
             }
         }
 
@@ -106,17 +113,18 @@ public class Driver {
 
         if (newAddress != null) {
             if (!isValidAddress(newAddress)) {
-                throw new IllegalArgumentException("Invalid address");
+                System.out.println("Invalid address");
             }
             this.address = newAddress;
         }
 
         if (newBirthdate != null) {
             if (!isValidBirthdate(newBirthdate)) {
-                throw new IllegalArgumentException("Invalid birthdate");
+                System.out.println("Invalid birthdate");
             }
             this.birthdate = newBirthdate;
         }
+        return true;
     }
 
     // Driver ID Validation

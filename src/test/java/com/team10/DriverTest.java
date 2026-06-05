@@ -21,9 +21,13 @@ public class DriverTest {
   
 
     @Test
-    void D1_TC2_duplicateDriverIDShouldBeRejected() throws IOException {
-
-        Files.deleteIfExists(Paths.get("drivers.txt"));
+    void D1_TC2_duplicateDriverIDShouldBeRejected() {
+        try {
+            Files.deleteIfExists(DriverRepository.FILE_PATH);
+            
+        } catch (Exception e) {
+            System.out.println(e);
+        }
 
         DriverRepository repo = new DriverRepository();
 
@@ -45,11 +49,12 @@ public class DriverTest {
                 "20-03-1995"
         );
 
-        repo.add(d1);
+        
 
-        assertThrows(IllegalArgumentException.class, () -> {
-            repo.add(d2);
-        });
+        assertTrue(repo.add(d1));
+        assertFalse(repo.add(d2));
+            
+            
     }
    
     @Test
@@ -133,7 +138,7 @@ public class DriverTest {
         // 11 years experience — changing license type should be rejected
         Driver d = new Driver("23@#abcdAB", "Alice", 11, "Light",
                 "12|Main|Melbourne|VIC|Australia", "10-05-1990");
-
+//false
         assertThrows(IllegalArgumentException.class,
                 () -> d.update(null, null, null, "Medium", null, null));
     }
@@ -174,7 +179,7 @@ public class DriverTest {
         // Address and licenseType updates should succeed for a driver with 5 years experience
         Driver d = new Driver("23@#abcdAB", "Alice", 5, "Light",
                 "12|Main|Melbourne|VIC|Australia", "10-05-1990");
-
+// assert true
         assertDoesNotThrow(() ->
                 d.update(null, null, null, "Medium",
                         "7|King St|Brisbane|QLD|Australia", null));

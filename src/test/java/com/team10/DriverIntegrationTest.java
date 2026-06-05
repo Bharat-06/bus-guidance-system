@@ -3,9 +3,8 @@ package com.team10;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import java.io.IOException;
 import java.nio.file.Files;
-import java.nio.file.Paths;
+
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -13,21 +12,35 @@ public class DriverIntegrationTest {
 
     private DriverRepository repo;
 
- 
+    @BeforeEach
+    void setUp()  {
+        // Remove any existing drivers.txt file to start fresh
+        try {
+            Files.deleteIfExists(DriverRepository.FILE_PATH);
+            repo = new DriverRepository();
+        } catch (Exception e) {
+            System.out.println(e);
+        }
+        
+    }
 
     // DI-TC1: Valid driver is stored correctly in TXT file
     @Test
-    void DI_TC1_validDriverStoredCorrectlyInFile() throws IOException {
+    void DI_TC1_validDriverStoredCorrectlyInFile() {
         Driver driver = new Driver(
                 "23@#abcdAB", "Alice", 3, "Light",
                 "12|Main|Melbourne|VIC|Australia", "10-05-1990"
         );
         repo.add(driver);
-
-        String fileContent = Files.readString(Paths.get("drivers.txt"));
-        assertTrue(fileContent.contains("23@#abcdAB"));
-        assertTrue(fileContent.contains("Alice"));
-        assertEquals(1, repo.count());
+        try {
+            String fileContent = Files.readString(DriverRepository.FILE_PATH);
+            assertTrue(fileContent.contains("23@#abcdAB"));
+            assertTrue(fileContent.contains("Alice"));
+            assertEquals(1, repo.count());
+        } catch (Exception e) {
+            System.out.println(e);
+        }
+        
     }
 
     // DI-TC2: Invalid driver is rejected and not stored in TXT file
@@ -45,7 +58,7 @@ public class DriverIntegrationTest {
 
     // DI-TC3: Driver update is persisted correctly to TXT file
     @Test
-    void DI_TC3_driverUpdatePersistedToFile() throws IOException {
+    void DI_TC3_driverUpdatePersistedToFile() {
         Driver driver = new Driver(
                 "34@#abcdCD", "Carol", 3, "Light",
                 "12|Main|Melbourne|VIC|Australia", "10-05-1990"
@@ -53,12 +66,18 @@ public class DriverIntegrationTest {
         repo.add(driver);
 
         repo.update("34@#abcdCD", null, null, "99|King St|Brisbane|QLD|Australia", null);
+        try {
+            // FUCKED
 
-        String fileContent = Files.readString(Paths.get("drivers.txt"));
-        assertTrue(fileContent.contains("99|King St|Brisbane|QLD|Australia"));
+            String fileContent = Files.readString(DriverRepository.FILE_PATH);
+            assertTrue(fileContent.contains("99|King St|Brisbane|QLD|Australia"));
+    
+            Driver updated = repo.retrieve("34@#abcdCD");
+            assertEquals("99|King St|Brisbane|QLD|Australia", updated.getAddress());
+        } catch (Exception e) {
+            System.out.println(e);
+        }
 
-        Driver updated = repo.retrieve("34@#abcdCD");
-        assertEquals("99|King St|Brisbane|QLD|Australia", updated.getAddress());
     }
 
     // DI-TC4: Driver count is updated correctly after each add

@@ -1,23 +1,27 @@
 package com.team10;
 
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 public class BusTest {
 
-
-
+    
+    // Clear the buses.txt file before each test so
+    // duplicate-ID checks always start from a clean state.
     
 
     @BeforeEach
-    void setUp() {
-        new File("buses.txt").delete();
+    void clearBusFile() {
+        new File(BusRepository.FILE_PATH).delete();
     }
-
     
     // B1: Bus ID Validation Tests
     
