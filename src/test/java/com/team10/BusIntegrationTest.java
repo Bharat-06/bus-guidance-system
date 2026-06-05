@@ -13,7 +13,7 @@ public class BusIntegrationTest {
         new File("buses.txt").delete();
         repo = new BusRepository();
     }
-    
+
     @Test
     void BI_TC1_validBusStored() {
         // Valid bus is stored correctly in TXT file
@@ -95,5 +95,30 @@ public class BusIntegrationTest {
 
         Bus stored = repo.retrieve("12345678");
         assertEquals(50, stored.getCapacity());
+    }
+
+
+// Valid driver assignment is successfully saved to the TXT file
+    @Test
+    void BI_TC6_saveDriverAssignmentSaved() throws IOException {
+
+        Bus bus = new Bus("88888888", 40, 200.0, "Diesel", null);
+        assertTrue(repo.add(bus));
+
+        String targetDriverID = "23@#abcdAB";
+        boolean isSaved = repo.saveAssignment("88888888", targetDriverID);
+
+
+        assertTrue(isSaved);
+
+
+        String fileContent = Files.readString(Paths.get("buses.txt"));
+        assertTrue(fileContent.contains("88888888"));
+        assertTrue(fileContent.contains(targetDriverID));
+
+
+        Bus retrievedBus = repo.retrieve("88888888");
+        assertNotNull(retrievedBus);
+        assertEquals(targetDriverID, retrievedBus.getAssignedDriverID());
     }
 }
