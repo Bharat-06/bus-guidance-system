@@ -89,7 +89,7 @@ public class DriverIntegrationTest {
     }
 
     @Test
-    void DI_TC4_updatePersistedToFile() {
+    void DI_TC4_updateSavedToFile() {
         Driver driver = new Driver(
             "34@#abcdCD", "Carol", "10-05-1990", 3, "Light",
             "12|Main|Melbourne|VIC|Australia"
