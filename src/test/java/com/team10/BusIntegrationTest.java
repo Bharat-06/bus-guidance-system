@@ -74,4 +74,33 @@ public class BusIntegrationTest {
         repo.add(b3);
         assertEquals(3, repo.count());
     }
+
+  
+        @Test
+void BI_TC5_busUpdateInvalidCapacityDoesNotChangeData() throws IOException {
+
+    // Clean state (important for file-based tests)
+    Files.writeString(Paths.get("buses.txt"), "");
+
+    Bus bus = new Bus("12345678", 50, 0.8, "Diesel", null);
+    assertTrue(repo.add(bus));
+
+    // Attempt INVALID update (increase capacity → should fail due to B2 rule)
+    boolean result = repo.update("12345678", 70, 0.5, "Diesel");
+
+    assertFalse(result);
+
+    // File should NOT contain the new capacity
+    String fileContent = assertDoesNotThrow(() ->
+        Files.readString(Paths.get("buses.txt"))
+    );
+
+    // Should still contain original capacity (50), NOT 70
+    assertTrue(fileContent.contains("50"));
+    assertFalse(fileContent.contains("70"));
+
+    // Object in repo should still be unchanged
+    Bus stored = repo.retrieve("12345678");
+    assertEquals(50, stored.getCapacity());
+}
 }

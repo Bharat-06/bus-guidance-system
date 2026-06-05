@@ -63,30 +63,28 @@ public class Bus {
         return assignedDriverID;
     }
 
-    // Setter for assigned driver (optional, but assignDriver is preferred)
+    // Setter for assigned driver
     public void setAssignedDriverID(String assignedDriverID) {
         this.assignedDriverID = assignedDriverID;
     }
 
-    // Assign a driver to this bus – enforces B3, B4, B5 using the Driver object
+    // Assign a driver to this bus, enforces B3, B4, B5 using the Driver object
     public boolean assignDriver(Driver driver) {
         if (driver == null) {
             return false;
         }
 
-        // B3: Driver Age Restriction
         // Drivers older than 50 cannot drive buses with capacity >= 50
         if (driver.getAge() > 50 && this.capacity >= 50) {
             return false;
         }
 
-        // B4: Electric Bus Restriction
         // Only drivers with at least 5 years of experience can drive electric buses
         if ("Electricity".equals(this.fuelType) && driver.getExperienceYears() < 5) {
             return false;
         }
 
-        // B5: Driver Licence Restriction
+
         // Only Heavy or PublicTransport licence for electric and hybrid buses
         if (("Electricity".equals(this.fuelType) || "Hybrid".equals(this.fuelType))
                 && !("Heavy".equals(driver.getLicenseType()) || "PublicTransport".equals(driver.getLicenseType()))) {
@@ -98,8 +96,7 @@ public class Bus {
         return true;
     }
 
-    // ------------------- Static Validation Methods -------------------
-
+// Validates busID confirming length and only having numerical values
     public static boolean validBusID(String id) {
         if (id == null || id.length() != 8) {
             System.out.println("BusID should be 8 characters long.");
@@ -113,7 +110,7 @@ public class Bus {
         }
         return true;
     }
-
+// Validates buses maximum and minimum capacity
     public static boolean capacityMaxMin(int capacity) {
         if (capacity < minCapacity) {
             System.out.println("Capacity too low. Minimum is " + minCapacity);
@@ -125,7 +122,7 @@ public class Bus {
         }
         return true;
     }
-
+// Validates the buses fuel level making sure it isnt negative or too much
     public static boolean validFuelLevel(double fuelLevel) {
         if (fuelLevel < 0) {
             System.out.println("Fuel level cannot be negative.");
@@ -137,7 +134,7 @@ public class Bus {
         }
         return true;
     }
-
+// validates buses fuel type
     public static boolean validFuelType(String fuelType) {
         if ("Diesel".equals(fuelType) || "Hybrid".equals(fuelType) || "Electricity".equals(fuelType)) {
             return true;
@@ -146,51 +143,5 @@ public class Bus {
         return false;
     }
 }
-
-
-    // // checking driver age to see if they can drive specific bus
-    // // fixed reference date to match test case
-    // private static final LocalDate test_date = LocalDate.of(2025, 6, 2);
-
-    // public static boolean isDriverAgeValidForBus(String birthdate, int capacity){
-    //     return isDriverAgeValidForBus(birthdate, capacity, test_date);
-    // }
-
-    // public static boolean isDriverAgeValidForBus(String birthdate, int capacity, LocalDate today){
-    //     try {
-    //         int age = Driver.getAge(birthdate, today);
-    //         if (age > 50 && capacity >= 50){
-    //             return false;
-    //         }
-    //         return true;
-    //     } 
-    //     catch (Exception e){
-    //         return false;
-    //     }
-    // }
-
-    // // check if driver can drive electric bus
-    // public static boolean isDriverExperienceValidForElectric(int experienceYears, String fuelType) {
-    //     if (fuelType.equals("Electricity") && experienceYears < 5){
-    //         return false;
-    //     }
-    //     return true;
-    // }
-
-    // // drivers with heavy or public transport license operating electric and hybrid buses
-    // public static boolean isLicenseValidForBus(String licenseType, String fuelType) {
-    //     if (fuelType.equals("Electricity") || fuelType.equals("Hybrid")) {
-    //         return licenseType.equals("Heavy") || licenseType.equals("PublicTransport");
-    //     }
-    //     return true;
-    // }
-
-    
-
-    // public static boolean capacityCheck(int oldCapacity, int newCapacity) {
-    //     return newCapacity <= oldCapacity;
-    // }
-
-
 
 
