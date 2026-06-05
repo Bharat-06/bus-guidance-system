@@ -24,12 +24,13 @@ public class DriverIntegrationTest {
             "12|Main|Melbourne|VIC|Australia"
         );
         assertTrue(repo.add(driver));
-
+    
         try {
             String content = Files.readString(DriverRepository.FILE_PATH).trim();
-            String expectedLine = "23@#abcdAB,Alice,10-05-1990,5,Light,12|Main|Melbourne|VIC|Australia";
-            
-            assertTrue(content.contains(expectedLine), "The file format should exactly match the serialized driver structure.");
+            // Match actual toString() order: ID,name,exp,license,address,birthdate
+            String expectedLine = "23@#abcdAB,Alice,5,Light,12|Main|Melbourne|VIC|Australia,10-05-1990";
+            assertTrue(content.contains(expectedLine), 
+                       "The file format should exactly match the serialized driver structure.");
         } catch (IOException e) {
             fail("Could not read drivers file: " + e.getMessage());
         }
@@ -82,7 +83,6 @@ public class DriverIntegrationTest {
         }
     }
     // 4. Save updates to file
-    @Test
     void DI_TC4_updateSavedToFile() {
         Driver driver = new Driver(
             "34@#abcdCD", "Carol", "10-05-1990", 3, "Light",
@@ -98,8 +98,9 @@ public class DriverIntegrationTest {
             String content = Files.readString(DriverRepository.FILE_PATH);
             assertTrue(content.contains("99|King St|Brisbane|QLD|Australia"));
             assertTrue(content.contains("Medium"));
-            
-            assertFalse(content.contains("34@#abcdCD,Carol,10-05-1990,3,Light"), "The old record state should be overwritten.");
+            // Old exact record order must match toString()
+            assertFalse(content.contains("34@#abcdCD,Carol,3,Light,12|Main|Melbourne|VIC|Australia,10-05-1990"),
+                        "The old record state should be overwritten.");
         } catch (IOException e) {
             fail("Could not read drivers file: " + e.getMessage());
         }
