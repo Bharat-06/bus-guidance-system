@@ -13,12 +13,6 @@ public class DriverRepository {
     public static final Path FILE_PATH =
         Paths.get("drivers.txt");
     private static final int FIELD_COUNT = 6;
-
-
-
-    
-
-
     // Add Driver
     // Adds a new driver to the TXT file and rejects duplicate driverIDs.
     
@@ -66,6 +60,7 @@ public class DriverRepository {
         }
         return null;
     }
+    
 
     // Retreive all driver details stored in file
     public List<Driver> retrieveAll() {
@@ -78,36 +73,64 @@ public class DriverRepository {
         return drivers;
     }
 
+
+
     // Update driver details
-    public void update(String driverID, Integer newExperience, String newLicenseType,
-                       String newAddress, String newBirthdate) {
+    public boolean update(String driverID, Integer newExperience, String newLicenseType,
+        String newAddress, String newBirthdate) {
 
         List<String> lines = readAllLines();
         boolean found = false;
 
         for (int i = 0; i < lines.size(); i++) {
-            String line = lines.get(i).trim();
-            if (line.isEmpty()) continue;
+        String line = lines.get(i).trim();
+        if (line.isEmpty()) continue;
 
-            Driver driver = deserialise(line);
-            if (driver != null && driver.getDriverID().equals(driverID)) {
-                // Driver.update() enforces D4 and D5 automatically
-                driver.update(null, null, newExperience, newLicenseType, newAddress, newBirthdate);
-                lines.set(i, serialise(driver));
-                found = true;
-                break;
-            }
+        Driver existing = deserialise(line);
+        if (existing != null && existing.getDriverID().equals(driverID)) {
+
+        // D5: driverID and name cannot be updated – no parameters for them, so safe.
+
+        // Determine final values (use existing if parameter is null)
+        int finalExperience = (newExperience != null) ? newExperience : existing.getExperienceYears();
+        String finalLicenseType = (newLicenseType != null) ? newLicenseType : existing.getLicenseType();
+        String finalAddress = (newAddress != null) ? newAddress : existing.getAddress();
+        String finalBirthdate = (newBirthdate != null) ? newBirthdate : existing.getBirthdate();
+
+        // D4: License cannot change if experience > 10 years
+        if (newLicenseType != null && !newLicenseType.equals(existing.getLicenseType())
+            && existing.getExperienceYears() > 10) {
+        return false;  // Violates D4
         }
 
-        if (!found) {
-            throw new IllegalArgumentException(
-                    "Update failed: No driver found with ID '" + driverID + "'.");
+        // Attempt to create updated driver – constructor validates all fields
+        try {
+        Driver updated = new Driver(
+                existing.getDriverID(),
+                existing.getName(), finalBirthdate, 
+                finalExperience,
+                finalLicenseType,
+                finalAddress
+        );
+        lines.set(i, serialise(updated));
+        found = true;
+        break;
+        } catch (IllegalArgumentException e) {
+        // Invalid field values (e.g., bad address, birthdate, etc.)
+        return false;
+        }
+        }
         }
 
-        writeAllLines(lines);
+    if (!found) {
+    return false;  // No driver with that ID
     }
 
-    // Returns the number of valid driver records in the file.
+    writeAllLines(lines);
+    return true;
+    }
+
+    //Returns the number of valid driver records in the file.
 
     public int count() {
         int count = 0;
@@ -175,7 +198,7 @@ public class DriverRepository {
             String address       = parts[4].trim();
             String birthdate     = parts[5].trim();
 
-            return new Driver(driverID, name, experienceYears, licenseType, address, birthdate);
+            return new Driver(driverID, name , birthdate, experienceYears, licenseType, address);
         } catch (Exception e) {
             System.err.println("Warning: Could not parse driver record: " + line);
             return null;

@@ -1,5 +1,5 @@
 package com.team10;
-
+import java.time.Year;
 import java.time.LocalDate;
 import java.time.Period;
 import java.time.format.DateTimeFormatter;
@@ -19,113 +19,59 @@ public class Driver {
     private String address;
     private String birthdate;
 
+    private int age;
+
     private static final String[] VALID_LICENSES =
             {"Light", "Medium", "Heavy", "PublicTransport"};
 
     // Constructor
 
-    public Driver(String driverID, String name, int experienceYears,
-                  String licenseType, String address, String birthdate) {
+    public Driver(String driverID, String name, String birthdate, int experienceYears,
+        String licenseType, String address) {
 
         if (!isValidDriverID(driverID)) {
-            System.out.println("Invalid driverID");
-            driverID = "12345678";
+        throw new IllegalArgumentException("Invalid driverID");
         }
 
         if (name == null || name.trim().isEmpty()) {
-            System.out.println("Invalid name");
-            name = "noname";
-        }
-
-        if (experienceYears < 0) {
-            System.out.println("Invalid experience");
-            experienceYears = 0;
-        }
-
-        if (!isValidLicenseType(licenseType)) {
-            System.out.println("Invalid license type");
-        
-        }
-
-        if (!isValidAddress(address)) {
-            System.out.println("Invalid address");
+        throw new IllegalArgumentException("Invalid name");
         }
 
         if (!isValidBirthdate(birthdate)) {
-            System.out.println("Invalid birthdate");
+        throw new IllegalArgumentException("Invalid birthdate");
+        }
+
+        if (!isValidExperience(experienceYears, birthdate)) {
+        throw new IllegalArgumentException("Invalid experience");
+        }
+
+        if (!isValidLicenseType(licenseType)) {
+        throw new IllegalArgumentException("Invalid license type");
+        }
+
+        if (!isValidAddress(address)) {
+        throw new IllegalArgumentException("Invalid address");
         }
 
         this.driverID = driverID;
         this.name = name;
+        this.birthdate = birthdate;
         this.experienceYears = experienceYears;
         this.licenseType = licenseType;
         this.address = address;
-        this.birthdate = birthdate;
+        this.age = calculateAge();
+        }
+
+
+    public int calculateAge() {
+
+        String[] parts = this.birthdate.split("-");
+        int birthYear = Integer.parseInt(parts[2]);
+        int currentYear = Year.now().getValue();
+
+        return currentYear - birthYear;
     }
 
-    // Update 
-
-    public boolean update(String newDriverID, String newName, Integer newExperienceYears,
-                       String newLicenseType, String newAddress, String newBirthdate) {
-
-        // D5: immutable fields
-        if (newDriverID != null && !newDriverID.equals(this.driverID)) {
-            System.out.println("D5: driverID cannot be changed");
-            return false;
-        }
-
-        if (newName != null && !newName.equals(this.name)) {
-            System.out.println("D5: name cannot be changed");
-            return false;
-        }
-
-        // Update experience first safely
-        int updatedExperience = this.experienceYears;
-        if (newExperienceYears != null) {
-            if (newExperienceYears < 0) {
-                System.out.println("Invalid experience");
-                return false;
-            }
-            updatedExperience = newExperienceYears;
-        }
-
-        // D4 check BEFORE applying license update
-        if (newLicenseType != null) {
-            if (updatedExperience > 10 &&
-                    !newLicenseType.equals(this.licenseType)) {
-                System.out.println(
-                        "D4: cannot change license after 10 years experience");
-            }
-
-            if (!isValidLicenseType(newLicenseType)) {
-                System.out.println("Invalid license type");
-            }
-        }
-
-        // Apply updates AFTER validation
-        if (newExperienceYears != null) {
-            this.experienceYears = newExperienceYears;
-        }
-
-        if (newLicenseType != null) {
-            this.licenseType = newLicenseType;
-        }
-
-        if (newAddress != null) {
-            if (!isValidAddress(newAddress)) {
-                System.out.println("Invalid address");
-            }
-            this.address = newAddress;
-        }
-
-        if (newBirthdate != null) {
-            if (!isValidBirthdate(newBirthdate)) {
-                System.out.println("Invalid birthdate");
-            }
-            this.birthdate = newBirthdate;
-        }
-        return true;
-    }
 
     // Driver ID Validation
     public static boolean isValidDriverID(String id) {
@@ -153,7 +99,21 @@ public class Driver {
 
         return true;
     }
-
+    public static boolean isValidExperience(int experienceYears, String birthdate) {
+        if (birthdate == null) {
+            return false;
+        }
+        
+        try {
+            int age = getAge(birthdate, LocalDate.now());
+            int maxAllowedExperience = age - 18;
+            
+            // Experience cannot be higher than (Age - 18)
+            return experienceYears <= maxAllowedExperience;
+        } catch (Exception e) {
+            return false;
+        }
+    }
     // Address Validation
     public static boolean isValidAddress(String address) {
         if (address == null) return false;
@@ -200,9 +160,7 @@ public class Driver {
         return Period.between(dob, today).getYears();
     }
 
-    public int getAge() {
-        return getAge(this.birthdate, LocalDate.now());
-    }
+
     
 
     // Getters
@@ -212,6 +170,9 @@ public class Driver {
     public String getLicenseType() { return licenseType; }
     public String getAddress() { return address; }
     public String getBirthdate() { return birthdate; }
+    public int getAge() { return age;
+    }
+    
 
     @Override
     public String toString() {
@@ -219,3 +180,6 @@ public class Driver {
                 + licenseType + "," + address + "," + birthdate;
     }
 }
+
+
+
