@@ -1,4 +1,3 @@
-
 package com.team10;
 
 import java.io.*;
@@ -6,32 +5,20 @@ import java.nio.file.*;
 import java.util.ArrayList;
 import java.util.List;
 
-// DriverRepository handles all file-based storage operations for Driver records.
-
 public class DriverRepository {
 
-    public static final Path FILE_PATH =
-        Paths.get("drivers.txt");
+    public static final Path FILE_PATH = Paths.get("drivers.txt");
     private static final int FIELD_COUNT = 6;
-    // Add Driver
-    // Adds a new driver to the TXT file and rejects duplicate driverIDs.
-    
-    public boolean add(Driver driver) {
 
-        
+    public boolean add(Driver driver) {
         if (driver == null) {
             System.out.println("Driver cannot be null");
             return false;
         }
-
-        // Ensures all drivers are unique
         if (retrieve(driver.getDriverID()) != null) {
-            System.out.println(
-                    "D1: A driver with ID '" + driver.getDriverID() + "' already exists.");
-                    return false;
+            System.out.println("D1: A driver with ID '" + driver.getDriverID() + "' already exists.");
+            return false;
         }
-
-        // append new driver record to file
         try {
             Files.writeString(
                     FILE_PATH,
@@ -46,11 +33,8 @@ public class DriverRepository {
         return true;
     }
 
-    // Find a driver based on driver ID
-
     public Driver retrieve(String driverID) {
         if (driverID == null || driverID.isEmpty()) return null;
-
         for (String line : readAllLines()) {
             if (line.trim().isEmpty()) continue;
             Driver driver = deserialise(line);
@@ -60,9 +44,7 @@ public class DriverRepository {
         }
         return null;
     }
-    
 
-    // Retreive all driver details stored in file
     public List<Driver> retrieveAll() {
         List<Driver> drivers = new ArrayList<>();
         for (String line : readAllLines()) {
@@ -73,64 +55,79 @@ public class DriverRepository {
         return drivers;
     }
 
-
-
-    // Update driver details
     public boolean update(String driverID, Integer newExperience, String newLicenseType,
-        String newAddress, String newBirthdate) {
-
+                          String newAddress, String newBirthdate) {
         List<String> lines = readAllLines();
         boolean found = false;
-
         for (int i = 0; i < lines.size(); i++) {
-        String line = lines.get(i).trim();
-        if (line.isEmpty()) continue;
+            String line = lines.get(i).trim();
+            if (line.isEmpty()) continue;
+            Driver existing = deserialise(line);
+            if (existing == null || !existing.getDriverID().equals(driverID)) continue;
 
-        Driver existing = deserialise(line);
-        if (existing != null && existing.getDriverID().equals(driverID)) {
+            int finalExperience;
+            if (newExperience != null) {
+                finalExperience = newExperience;
+            } else {
+                finalExperience = existing.getExperienceYears();
+            }
 
-        // D5: driverID and name cannot be updated – no parameters for them, so safe.
+            String finalLicenseType;
+            if (newLicenseType != null) {
+                finalLicenseType = newLicenseType;
+            } else {
+                finalLicenseType = existing.getLicenseType();
+            }
 
-        // Determine final values (use existing if parameter is null)
-        int finalExperience = (newExperience != null) ? newExperience : existing.getExperienceYears();
-        String finalLicenseType = (newLicenseType != null) ? newLicenseType : existing.getLicenseType();
-        String finalAddress = (newAddress != null) ? newAddress : existing.getAddress();
-        String finalBirthdate = (newBirthdate != null) ? newBirthdate : existing.getBirthdate();
+            String finalAddress;
+            if (newAddress != null) {
+                finalAddress = newAddress;
+            } else {
+                finalAddress = existing.getAddress();
+            }
 
-        // D4: License cannot change if experience > 10 years
-        if (newLicenseType != null && !newLicenseType.equals(existing.getLicenseType())
-            && existing.getExperienceYears() > 10) {
-        return false;  // Violates D4
+            String finalBirthdate;
+            if (newBirthdate != null) {
+                finalBirthdate = newBirthdate;
+            } else {
+                finalBirthdate = existing.getBirthdate();
+            }
+
+            if (finalExperience < 0) {
+                System.out.println("Experience cannot be negative.");
+                return false;
+            }
+
+            if (newLicenseType != null && !newLicenseType.equals(existing.getLicenseType())
+                    && existing.getExperienceYears() > 10) {
+                System.out.println("D4: Cannot change license type when experience exceeds 10 years.");
+                return false;
+            }
+
+            try {
+                Driver updated = new Driver(
+                        existing.getDriverID(),
+                        existing.getName(),
+                        finalBirthdate,
+                        finalExperience,
+                        finalLicenseType,
+                        finalAddress
+                );
+                lines.set(i, serialise(updated));
+                found = true;
+                break;
+            } catch (IllegalArgumentException e) {
+                System.out.println("Update rejected: " + e.getMessage());
+                return false;
+            }
         }
-
-        // Attempt to create updated driver – constructor validates all fields
-        try {
-        Driver updated = new Driver(
-                existing.getDriverID(),
-                existing.getName(), finalBirthdate, 
-                finalExperience,
-                finalLicenseType,
-                finalAddress
-        );
-        lines.set(i, serialise(updated));
-        found = true;
-        break;
-        } catch (IllegalArgumentException e) {
-        // Invalid field values (e.g., bad address, birthdate, etc.)
-        return false;
+        if (!found) {
+            System.out.println("No driver found with ID '" + driverID + "'");
+            return false;
         }
-        }
-        }
-
-    if (!found) {
-    return false;  // No driver with that ID
+        writeAllLines(lines);
+        return true;
     }
-
-    writeAllLines(lines);
-    return true;
-    }
-
-    //Returns the number of valid driver records in the file.
 
     public int count() {
         int count = 0;
@@ -140,65 +137,42 @@ public class DriverRepository {
         return count;
     }
 
-    // HELPER FUNCTIONS
-    // Reads all lines from the TXT file.
     private List<String> readAllLines() {
         try {
-
-            if (!Files.exists(FILE_PATH)) {
-                return new ArrayList<>();
-            }
-            
+            if (!Files.exists(FILE_PATH)) return new ArrayList<>();
             return Files.readAllLines(FILE_PATH);
         } catch (IOException e) {
             throw new RuntimeException("Failed to read driver storage file.", e);
         }
     }
 
-
-    // Overwrites the TXT file with the updated details.
-
     private void writeAllLines(List<String> lines) {
         try {
-            Files.write(
-                    FILE_PATH,
-                    lines,
-                    StandardOpenOption.CREATE,
-                    StandardOpenOption.TRUNCATE_EXISTING
-            );
+            Files.write(FILE_PATH, lines, StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING);
         } catch (IOException e) {
-            throw new RuntimeException(
-                    "Failed to write to driver storage file.", e);
+            throw new RuntimeException("Failed to write to driver storage file.", e);
         }
     }
-
-    // converts a Driver to a comma-separated string for file storage.
 
     private String serialise(Driver driver) {
         return driver.toString();
     }
 
-
-    // Parses a comma-separated line back into a Driver object.
-
     private Driver deserialise(String line) {
         if (line == null || line.trim().isEmpty()) return null;
-
         String[] parts = line.split(",", FIELD_COUNT);
         if (parts.length != FIELD_COUNT) {
             System.err.println("Warning: Skipping malformed driver record: " + line);
             return null;
         }
-
         try {
-            String driverID      = parts[0].trim();
-            String name          = parts[1].trim();
-            int experienceYears  = Integer.parseInt(parts[2].trim());
-            String licenseType   = parts[3].trim();
-            String address       = parts[4].trim();
-            String birthdate     = parts[5].trim();
-
-            return new Driver(driverID, name , birthdate, experienceYears, licenseType, address);
+            String driverID = parts[0].trim();
+            String name = parts[1].trim();
+            int experienceYears = Integer.parseInt(parts[2].trim());
+            String licenseType = parts[3].trim();
+            String address = parts[4].trim();
+            String birthdate = parts[5].trim();
+            return new Driver(driverID, name, birthdate, experienceYears, licenseType, address);
         } catch (Exception e) {
             System.err.println("Warning: Could not parse driver record: " + line);
             return null;

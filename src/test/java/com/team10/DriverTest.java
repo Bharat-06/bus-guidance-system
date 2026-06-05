@@ -1,187 +1,181 @@
-// package com.team10;
+package com.team10;
 
-// import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import java.io.IOException;
+import java.nio.file.Files;
+import static org.junit.jupiter.api.Assertions.*;
 
-// import static org.junit.jupiter.api.Assertions.*;
+public class DriverTest {
 
-// import java.io.IOException;
-// import java.nio.file.Files;
-// import java.nio.file.Paths;
+    private DriverRepository repo;
 
-// public class DriverTest {
+    @BeforeEach
+    void setUp() throws IOException {
+        Files.deleteIfExists(DriverRepository.FILE_PATH);
+        repo = new DriverRepository();
+    }
 
-    
-//     // D1: Driver ID Tests
-    
-//     @Test
-//     void D1_TC1_validDriverIDShouldPass() {
-//         // Valid: 10 chars, first 2 digits in 2-9, at least 2 special chars in pos 3-8, last 2 uppercase
-//         assertTrue(Driver.isValidDriverID("23@#abcdAB"));
-//     }
-  
+    // ==================== D1: Driver ID Rules ====================
 
-//     @Test
-//     void D1_TC2_duplicateDriverIDShouldBeRejected() {
-//         try {
-//             Files.deleteIfExists(DriverRepository.FILE_PATH);
-            
-//         } catch (Exception e) {
-//             System.out.println(e);
-//         }
+    @Test
+    void D1_TC1_validDriverID_shouldPass() {
+        Driver d = new Driver("23@#abcdAB", "Alice", "10-05-1990", 5, "Light", "12|Main|Melbourne|VIC|Australia");
+        assertEquals("23@#abcdAB", d.getDriverID());
+    }
 
-//         DriverRepository repo = new DriverRepository();
+    @Test
+    void D1_TC2_tooShortID_shouldThrow() {
+        assertThrows(IllegalArgumentException.class, () ->
+            new Driver("23@#abAB", "Alice", "10-05-1990", 5, "Light", "12|Main|Melbourne|VIC|Australia"));
+    }
 
-//         Driver d1 = new Driver(
-//                 "23@#abcdAB",
-//                 "Alice",
-//                 3,
-//                 "Light",
-//                 "12|Main|Melbourne|VIC|Australia",
-//                 "10-05-1990"
-//         );
+    @Test
+    void D1_TC3_tooLongID_shouldThrow() {
+        assertThrows(IllegalArgumentException.class, () ->
+            new Driver("23@#abcdABXY", "Alice", "10-05-1990", 5, "Light", "12|Main|Melbourne|VIC|Australia"));
+    }
 
-//         Driver d2 = new Driver(
-//                 "23@#abcdAB",
-//                 "Bob",
-//                 2,
-//                 "Light",
-//                 "5|High|Sydney|NSW|Australia",
-//                 "20-03-1995"
-//         );
+    @Test
+    void D1_TC4_firstCharNot2to9_shouldThrow() {
+        assertThrows(IllegalArgumentException.class, () ->
+            new Driver("13@#abcdAB", "Alice", "10-05-1990", 5, "Light", "12|Main|Melbourne|VIC|Australia"));
+    }
 
-        
+    @Test
+    void D1_TC5_lessThan2SpecialChars_shouldThrow() {
+        assertThrows(IllegalArgumentException.class, () ->
+            new Driver("23abcdefAB", "Alice", "10-05-1990", 5, "Light", "12|Main|Melbourne|VIC|Australia"));
+    }
 
-//         assertTrue(repo.add(d1));
-//         assertFalse(repo.add(d2));
-            
-            
-//     }
-   
-//     @Test
-//     void D1_TC3_idTooShortShouldFail() {
-//         // 8 chars — must be exactly 10
-//         assertFalse(Driver.isValidDriverID("23@#abAB"));
-//     }
+    @Test
+    void D1_TC6_lastTwoNotUppercase_shouldThrow() {
+        assertThrows(IllegalArgumentException.class, () ->
+            new Driver("23@#abcdab", "Alice", "10-05-1990", 5, "Light", "12|Main|Melbourne|VIC|Australia"));
+    }
 
-//     @Test
-//     void D1_TC4_idTooLongShouldFail() {
-//         // 12 chars — must be exactly 10
-//         assertFalse(Driver.isValidDriverID("23@#abcdABXY"));
-//     }
+    // D2: Address Format 
 
-//     @Test
-//     void D1_TC5_firstCharNotInRange2to9ShouldFail() {
-//         // First digit is 1, which is outside 2-9
-//         assertFalse(Driver.isValidDriverID("13@#abcdAB"));
-//     }
+    @Test
+    void D2_TC1_validAddress_shouldPass() {
+        Driver d = new Driver("23@#abcdAB", "Alice", "10-05-1990", 5, "Light", "12|Main|Melbourne|VIC|Australia");
+        assertEquals("12|Main|Melbourne|VIC|Australia", d.getAddress());
+    }
 
-//     @Test
-//     void D1_TC6_fewerThan2SpecialCharsInPositions3to8ShouldFail() {
-//         // No special chars in positions 3-8
-//         assertFalse(Driver.isValidDriverID("23abcdefAB"));
-//     }
+    @Test
+    void D2_TC2_missingSegment_shouldThrow() {
+        assertThrows(IllegalArgumentException.class, () ->
+            new Driver("23@#abcdAB", "Alice", "10-05-1990", 5, "Light", "12|Main|Melbourne|VIC"));
+    }
 
-    
-//     // D2: Address Format Tests
-     
-//     @Test
-//     void D2_TC1_validAddressShouldPass() {
-//         assertTrue(Driver.isValidAddress("12|Main St|Sydney|NSW|Australia"));
-//     }
+    @Test
+    void D2_TC3_wrongDelimiter_shouldThrow() {
+        assertThrows(IllegalArgumentException.class, () ->
+            new Driver("23@#abcdAB", "Alice", "10-05-1990", 5, "Light", "12 Main Melbourne VIC Australia"));
+    }
 
-//     @Test
-//     void D2_TC2_addressMissingSegmentShouldFail() {
-//         // Only 4 pipe-separated segments instead of 5
-//         assertFalse(Driver.isValidAddress("12|Main St|Sydney|NSW"));
-//     }
+    @Test
+    void D2_TC4_emptySegment_shouldThrow() {
+        assertThrows(IllegalArgumentException.class, () ->
+            new Driver("23@#abcdAB", "Alice", "10-05-1990", 5, "Light", "12||Melbourne|VIC|Australia"));
+    }
 
-//     @Test
-//     void D2_TC3_addressWithWrongDelimiterShouldFail() {
-//         // Uses spaces instead of pipe characters
-//         assertFalse(Driver.isValidAddress("12 Main St Sydney NSW Australia"));
-//     }
+    // ==================== D3: Birthdate Format ====================
 
-    
-//     // D3: Birthdate Format Tests
-    
-//     @Test
-//     void D3_TC1_validBirthdateShouldPass() {
-//         assertTrue(Driver.isValidBirthdate("15-06-1990"));
-//     }
+    @Test
+    void D3_TC1_validBirthdate_shouldPass() {
+        Driver d = new Driver("23@#abcdAB", "Alice", "10-05-1990", 5, "Light", "12|Main|Melbourne|VIC|Australia");
+        assertEquals("10-05-1990", d.getBirthdate());
+    }
 
-//     @Test
-//     void D3_TC2_wrongDateFormatShouldFail() {
-//         // Format is yyyy/MM/dd, not dd-MM-yyyy
-//         assertFalse(Driver.isValidBirthdate("1990/06/15"));
-//     }
+    @Test
+    void D3_TC2_wrongFormat_shouldThrow() {
+        assertThrows(IllegalArgumentException.class, () ->
+            new Driver("23@#abcdAB", "Alice", "1990/05/10", 5, "Light", "12|Main|Melbourne|VIC|Australia"));
+    }
 
-//     @Test
-//     void D3_TC3_invalidDateValueShouldFail() {
-//         // Day 32 and month 13 do not exist
-//         assertFalse(Driver.isValidBirthdate("32-13-2000"));
-//     }
+    @Test
+    void D3_TC3_invalidDate_shouldThrow() {
+        assertThrows(IllegalArgumentException.class, () ->
+            new Driver("23@#abcdAB", "Alice", "32-13-2000", 5, "Light", "12|Main|Melbourne|VIC|Australia"));
+    }
 
-    
-//     // D4: License Update Restriction Tests
-    
-//     @Test
-//     void D4_TC1_licenseUpdateAllowedUnder10YearsExperience() {
-//         // 8 years experience — license change from Light to Medium should succeed
-//         Driver d = new Driver("23@#abcdAB", "Alice", 8, "Light",
-//                 "12|Main|Melbourne|VIC|Australia", "10-05-1990");
+    @Test
+    void D3_TC4_feb29NonLeapYear_shouldThrow() {
+        assertThrows(IllegalArgumentException.class, () ->
+            new Driver("23@#abcdAB", "Alice", "29-02-2001", 5, "Light", "12|Main|Melbourne|VIC|Australia"));
+    }
 
-//         assertDoesNotThrow(() -> d.update(null, null, null, "Medium", null, null));
-//     }
+    // ==================== D4: License Update Restriction ====================
+    // Rule: If experience > 10 years, license type cannot be changed.
+    // Test via DriverRepository.update()
 
-//     @Test
-//     void D4_TC2_licenseUpdateBlockedOver10YearsExperience() {
-//         // 11 years experience — changing license type should be rejected
-//         Driver d = new Driver("23@#abcdAB", "Alice", 11, "Light",
-//                 "12|Main|Melbourne|VIC|Australia", "10-05-1990");
-// //false
-//         assertThrows(IllegalArgumentException.class,
-//                 () -> d.update(null, null, null, "Medium", null, null));
-//     }
+    @Test
+    void D4_TC1_licenseUpdateAllowedWhenExperienceUnder10() {
+        Driver d = new Driver("23@#abcdAB", "Alice", "10-05-1990", 8, "Light", "12|Main|Melbourne|VIC|Australia");
+        repo.add(d);
+        boolean result = repo.update("23@#abcdAB", null, "Medium", null, null);
+        assertTrue(result);
+        assertEquals("Medium", repo.retrieve("23@#abcdAB").getLicenseType());
+    }
 
-//     @Test
-//     void D4_TC3_licenseUpdateBlockedAtExactly11YearsExperience() {
-//         // Exactly 11 years — still over 10, so change should be rejected
-//         Driver d = new Driver("23@#abcdAB", "Alice", 11, "Heavy",
-//                 "12|Main|Melbourne|VIC|Australia", "10-05-1990");
+    @Test
+    void D4_TC2_licenseUpdateBlockedWhenExperienceOver10() {
+        Driver d = new Driver("23@#abcdAB", "Alice", "10-05-1970", 12, "Light", "12|Main|Melbourne|VIC|Australia");
+        repo.add(d);
+        boolean result = repo.update("23@#abcdAB", null, "Medium", null, null);
+        assertFalse(result);
+        assertEquals("Light", repo.retrieve("23@#abcdAB").getLicenseType());
+    }
 
-//         assertThrows(IllegalArgumentException.class,
-//                 () -> d.update(null, null, null, "Light", null, null));
-//     }
+    @Test
+    void D4_TC3_licenseUpdateBlockedAtExactly11Years() {
+        Driver d = new Driver("23@#abcdAB", "Alice", "10-05-1970", 11, "Heavy", "12|Main|Melbourne|VIC|Australia");
+        repo.add(d);
+        boolean result = repo.update("23@#abcdAB", null, "Light", null, null);
+        assertFalse(result);
+        assertEquals("Heavy", repo.retrieve("23@#abcdAB").getLicenseType());
+    }
 
-    
-//     // D5: Immutable Fields Tests
-    
-//     @Test
-//     void D5_TC1_driverIDCannotBeUpdated() {
-//         Driver d = new Driver("23@#abcdAB", "Alice", 5, "Light",
-//                 "12|Main|Melbourne|VIC|Australia", "10-05-1990");
+    @Test
+    void D4_TC4_sameLicenseUpdateAlwaysAllowed() {
+        Driver d = new Driver("23@#abcdAB", "Alice", "10-05-1970", 15, "Light", "12|Main|Melbourne|VIC|Australia");
+        repo.add(d);
+        boolean result = repo.update("23@#abcdAB", null, "Light", null, null);
+        assertTrue(result);
+        assertEquals("Light", repo.retrieve("23@#abcdAB").getLicenseType());
+    }
 
-//         assertThrows(IllegalArgumentException.class,
-//                 () -> d.update("99@#wxyzXY", null, null, null, null, null));
-//     }
+    // ==================== D5: Immutable Fields (ID and Name) ====================
+    // DriverRepository.update() never accepts driverID or name parameters.
+    // We test that these fields remain unchanged after any update.
 
-//     @Test
-//     void D5_TC2_driverNameCannotBeUpdated() {
-//         Driver d = new Driver("23@#abcdAB", "Alice", 5, "Light",
-//                 "12|Main|Melbourne|VIC|Australia", "10-05-1990");
+    @Test
+    void D5_TC1_driverIDNeverChangesDuringUpdate() {
+        Driver d = new Driver("23@#abcdAB", "Alice", "10-05-1990", 5, "Light", "12|Main|Melbourne|VIC|Australia");
+        repo.add(d);
+        repo.update("23@#abcdAB", 6, "Medium", "99|King|Sydney|NSW|Australia", "15-06-1992");
+        Driver updated = repo.retrieve("23@#abcdAB");
+        assertEquals("23@#abcdAB", updated.getDriverID());
+    }
 
-//         assertThrows(IllegalArgumentException.class,
-//                 () -> d.update(null, "Bob", null, null, null, null));
-//     }
+    @Test
+    void D5_TC2_nameNeverChangesDuringUpdate() {
+        Driver d = new Driver("23@#abcdAB", "Alice", "10-05-1990", 5, "Light", "12|Main|Melbourne|VIC|Australia");
+        repo.add(d);
+        repo.update("23@#abcdAB", 6, "Medium", "99|King|Sydney|NSW|Australia", "15-06-1992");
+        Driver updated = repo.retrieve("23@#abcdAB");
+        assertEquals("Alice", updated.getName());
+    }
 
-//     @Test
-//     void D5_TC3_otherFieldsCanBeUpdatedNormally() {
-//         // Address and licenseType updates should succeed for a driver with 5 years experience
-//         Driver d = new Driver("23@#abcdAB", "Alice", 5, "Light",
-//                 "12|Main|Melbourne|VIC|Australia", "10-05-1990");
-// // assert true
-//         assertDoesNotThrow(() ->
-//                 d.update(null, null, null, "Medium",
-//                         "7|King St|Brisbane|QLD|Australia", null));
-//     }
-// }
+    @Test
+    void D5_TC3_nameCannotBePassedToUpdate() {
+        // The update method signature has no 'name' parameter, so it's impossible to change.
+        // This test is a compile-time guarantee demonstration.
+        Driver d = new Driver("23@#abcdAB", "Alice", "10-05-1990", 5, "Light", "12|Main|Melbourne|VIC|Australia");
+        repo.add(d);
+        // If there were a name parameter, we would try to pass it, but there isn't.
+        assertTrue(repo.update("23@#abcdAB", null, null, null, null));
+        assertEquals("Alice", repo.retrieve("23@#abcdAB").getName());
+    }
+}
