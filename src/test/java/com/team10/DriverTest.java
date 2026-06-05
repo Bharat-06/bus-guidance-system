@@ -123,12 +123,14 @@ public class DriverTest {
     }
 
     @Test
-    void D4_TC3_licenseUpdateBlockedAtExactly10Years() {
-        Driver d = new Driver("23@#abcdAB", "Alice", "10-05-1970", 10, "Heavy", "12|Main|Melbourne|VIC|Australia");
+    void D4_TC4_licenseUpdateAllowedAtExactly10Years() {
+    // Experience is exactly 10 years. Licence change should be allowed.
+        Driver d = new Driver("23@#abcdAB", "Alice", "10-05-1990", 10, "Light",
+                            "12|Main|Melbourne|VIC|Australia");
         repo.add(d);
-        boolean result = repo.update("23@#abcdAB", null, "Light", null, null);
-        assertFalse(result);
-        assertEquals("Heavy", repo.retrieve("23@#abcdAB").getLicenseType());
+        boolean result = repo.update("23@#abcdAB", null, "Medium", null, null);
+        assertTrue(result);
+        assertEquals("Medium", repo.retrieve("23@#abcdAB").getLicenseType());
     }
 
     @Test

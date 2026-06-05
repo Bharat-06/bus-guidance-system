@@ -18,20 +18,24 @@ public class DriverIntegrationTest {
 
     // 1. Valid driver is stored correctly
     @Test
-    void DI_TC1_validDriverStoredCorrectly() throws IOException {
+    void DI_TC1_validDriverStoredCorrectly() {
         Driver driver = new Driver(
             "23@#abcdAB", "Alice", "10-05-1990", 5, "Light",
             "12|Main|Melbourne|VIC|Australia"
         );
         assertTrue(repo.add(driver));
 
-        String content = Files.readString(DriverRepository.FILE_PATH);
-        assertTrue(content.contains("23@#abcdAB"));
-        assertTrue(content.contains("Alice"));
-        assertTrue(content.contains("5"));
-        assertTrue(content.contains("Light"));
-        assertTrue(content.contains("12|Main|Melbourne|VIC|Australia"));
-        assertTrue(content.contains("10-05-1990"));
+        try {
+            String content = Files.readString(DriverRepository.FILE_PATH);
+            assertTrue(content.contains("23@#abcdAB"));
+            assertTrue(content.contains("Alice"));
+            assertTrue(content.contains("5"));
+            assertTrue(content.contains("Light"));
+            assertTrue(content.contains("12|Main|Melbourne|VIC|Australia"));
+            assertTrue(content.contains("10-05-1990"));
+        } catch (IOException e) {
+            fail("Could not read drivers file: " + e.getMessage());
+        }
         assertEquals(1, repo.count());
     }
 
@@ -50,16 +54,22 @@ public class DriverIntegrationTest {
 
     // 3. Duplicate driver ID is rejected by repository (D1) – file unchanged
     @Test
-    void DI_TC3_duplicateDriverRejectedByRepository() throws IOException {
+    void DI_TC3_duplicateDriverRejectedByRepository() {
         Driver d1 = new Driver(
             "23@#abcdAB", "Alice", "10-05-1990", 5, "Light",
             "12|Main|Melbourne|VIC|Australia"
         );
         assertTrue(repo.add(d1));
-
+    
         // Read file content after first add
-        String contentAfterFirst = Files.readString(DriverRepository.FILE_PATH);
-
+        String contentAfterFirst;
+        try {
+            contentAfterFirst = Files.readString(DriverRepository.FILE_PATH);
+        } catch (IOException e) {
+            fail("Could not read drivers file: " + e.getMessage());
+            return;
+        }
+    
         // Try to add another driver with same ID
         Driver d2 = new Driver(
             "23@#abcdAB", "Bob", "20-03-1995", 2, "Light",
@@ -68,31 +78,38 @@ public class DriverIntegrationTest {
         boolean result = repo.add(d2);
         assertFalse(result);
         assertEquals(1, repo.count());
-
+    
         // File content must be unchanged
-        String contentAfterSecond = Files.readString(DriverRepository.FILE_PATH);
-        assertEquals(contentAfterFirst, contentAfterSecond);
+        try {
+            String contentAfterSecond = Files.readString(DriverRepository.FILE_PATH);
+            assertEquals(contentAfterFirst, contentAfterSecond);
+        } catch (IOException e) {
+            fail("Could not read drivers file: " + e.getMessage());
+        }
     }
 
-    // 4. Update is persisted correctly (old values removed, new values written)
     @Test
-    void DI_TC4_updatePersistedToFile() throws IOException {
+    void DI_TC4_updatePersistedToFile() {
         Driver driver = new Driver(
             "34@#abcdCD", "Carol", "10-05-1990", 3, "Light",
             "12|Main|Melbourne|VIC|Australia"
         );
         repo.add(driver);
-
+    
         boolean updated = repo.update("34@#abcdCD", null, "Medium",
                                       "99|King St|Brisbane|QLD|Australia", null);
         assertTrue(updated);
-
-        String content = Files.readString(DriverRepository.FILE_PATH);
-        assertTrue(content.contains("99|King St|Brisbane|QLD|Australia"));
-        assertTrue(content.contains("Medium"));
-        assertFalse(content.contains("12|Main|Melbourne|VIC|Australia"));
-        assertFalse(content.contains("Light"));
-
+    
+        try {
+            String content = Files.readString(DriverRepository.FILE_PATH);
+            assertTrue(content.contains("99|King St|Brisbane|QLD|Australia"));
+            assertTrue(content.contains("Medium"));
+            assertFalse(content.contains("12|Main|Melbourne|VIC|Australia"));
+            assertFalse(content.contains("Light"));
+        } catch (IOException e) {
+            fail("Could not read drivers file: " + e.getMessage());
+        }
+    
         Driver retrieved = repo.retrieve("34@#abcdCD");
         assertEquals("99|King St|Brisbane|QLD|Australia", retrieved.getAddress());
         assertEquals("Medium", retrieved.getLicenseType());
