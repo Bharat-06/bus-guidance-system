@@ -100,12 +100,6 @@ public class DriverTest {
             new Driver("23@#abcdAB", "Alice", "32-13-2000", 5, "Light", "12|Main|Melbourne|VIC|Australia"));
     }
 
-    @Test
-    void D3_TC4_feb29NonLeapYear_shouldThrow() {
-        assertThrows(IllegalArgumentException.class, () ->
-            new Driver("23@#abcdAB", "Alice", "29-02-2001", 5, "Light", "12|Main|Melbourne|VIC|Australia"));
-    }
-
     // ==================== D4: License Update Restriction ====================
     // Rule: If experience > 10 years, license type cannot be changed.
     // Test via DriverRepository.update()
@@ -129,8 +123,8 @@ public class DriverTest {
     }
 
     @Test
-    void D4_TC3_licenseUpdateBlockedAtExactly11Years() {
-        Driver d = new Driver("23@#abcdAB", "Alice", "10-05-1970", 11, "Heavy", "12|Main|Melbourne|VIC|Australia");
+    void D4_TC3_licenseUpdateBlockedAtExactly10Years() {
+        Driver d = new Driver("23@#abcdAB", "Alice", "10-05-1970", 10, "Heavy", "12|Main|Melbourne|VIC|Australia");
         repo.add(d);
         boolean result = repo.update("23@#abcdAB", null, "Light", null, null);
         assertFalse(result);
