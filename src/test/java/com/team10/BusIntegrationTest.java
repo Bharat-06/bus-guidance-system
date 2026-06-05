@@ -1,95 +1,77 @@
 package com.team10;
-
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
-import java.nio.file.Path;
 import java.nio.file.Paths;
-
 import static org.junit.jupiter.api.Assertions.*;
-
 public class BusIntegrationTest {
-
+    private BusRepository repo;
     @BeforeEach
     void setUp() {
         new File("buses.txt").delete();
+        repo = new BusRepository();
     }
-    
-
-    // BI-TC1: Valid bus is stored correctly in TXT file
     @Test
-    void BI_TC1_validBusStoredCorrectlyInFile() {
-        Bus bus = new Bus("12345678", 40, 0.8, "Diesel");
-        assertTrue(BusRepository.add(bus));
-        
-        // Read the TXT file directly and check it contains the bus
-        
-        
+    void BI_TC1_validBusStored() {
+        // Valid bus is stored correctly in TXT file
+        Bus bus = new Bus("12345678", 40, 0.8, "Diesel", null);
+        assertTrue(repo.add(bus));
+
+        String fileContent;
+
         try {
-            String fileContent = Files.readString(Paths.get(BusRepository.FILE_PATH));
-            assertTrue(fileContent.contains("12345678"));
-            assertTrue(fileContent.contains("Diesel"));
-        } catch (Exception e) {
-            System.out.println(e);
+            fileContent = Files.readString(Paths.get("buses.txt"));
+        } 
+        catch (IOException e) {
+            fail("Failed to read buses.txt: " + e.getMessage());
+            return;
         }
 
-
-        // Also verify count increased
-        assertEquals(1, BusRepository.count());
-    }
-
-    // BI-TC2: Invalid bus is rejected and not stored in TXT file
+        assertTrue(fileContent.contains("12345678"));
+        assertEquals(1, repo.count());
+}
+    
     @Test
-    void BI_TC2_invalidBusRejectedAndNotStored() {
-        // Attempt to add a bus with a non-numeric busID
-        Bus bus = new Bus("1234567A", 40, 0.8, "Diesel");
-        assertFalse(BusRepository.add(bus));
-
-        // File should not exist or count must be 0
-        assertEquals(0, BusRepository.count());
+    void BI_TC2_invalidBusRejected() {
+        // Invalid bus is rejected and not stored in TXT file
+        assertThrows(IllegalArgumentException.class, () -> {
+            new Bus("1234567A", 40, 0.8, "Diesel", null);
+        });
+        assertEquals(0, repo.count());
     }
 
-    // BI-TC3: Bus update is persisted correctly to TXT file
     @Test
     void BI_TC3_busUpdatePersistedToFile() {
-        // Add a valid bus first
-        Bus bus = new Bus("12345678", 50, 0.8, "Diesel");
-        BusRepository.add(bus);
+        // Bus update is persisted correctly to TXT file
+        Bus bus = new Bus("12345678", 50, 0.8, "Diesel", null);
+        repo.add(bus);
+        
 
-        // Decrease capacity from 50 to 30
-        assertTrue(BusRepository.update("12345678", 30, 0.8, "Diesel"));
+        assertTrue(repo.update("12345678", 30, 0.8, "Diesel"));
 
-        // Read the TXT file and verify updated capacity is persisted
-        try {
-            String fileContent = Files.readString(Paths.get(BusRepository.FILE_PATH));
-            assertTrue(fileContent.contains("30"));
-        } catch (Exception e) {
-            System.out.println(e);
-        }
+        String fileContent = assertDoesNotThrow(() ->
+            Files.readString(Paths.get("buses.txt"))
+        );
 
+        assertTrue(fileContent.contains("30"));
 
-        // Also verify via retrieve
-        Bus updated = BusRepository.retrieve("12345678");
+        Bus updated = repo.retrieve("12345678");
         assertEquals(30, updated.getCapacity());
     }
 
-    // BI-TC4: Bus count is updated correctly after each add
     @Test
     void BI_TC4_busCountUpdatedCorrectlyAfterAdd() {
-        Bus b1 = new Bus("11111111", 40, 0.8, "Diesel");
-        Bus b2 = new Bus("22222222", 30, 0.6, "Hybrid");
-        Bus b3 = new Bus("33333333", 20, 0.9, "Electricity");
-
-        BusRepository.add(b1);
-        assertEquals(1, BusRepository.count());
-
-        BusRepository.add(b2);
-        assertEquals(2, BusRepository.count());
-
-        BusRepository.add(b3);
-        assertEquals(3, BusRepository.count());
+        // Bus count is updated correctly after each add
+        Bus b1 = new Bus("11111111", 40, 0.8, "Diesel", null);
+        Bus b2 = new Bus("22222222", 30, 0.6, "Hybrid", null);
+        Bus b3 = new Bus("33333333", 20, 0.9, "Electricity", null);
+        repo.add(b1);
+        assertEquals(1, repo.count());
+        repo.add(b2);
+        assertEquals(2, repo.count());
+        repo.add(b3);
+        assertEquals(3, repo.count());
     }
 }
