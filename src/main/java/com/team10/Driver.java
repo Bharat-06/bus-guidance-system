@@ -13,7 +13,7 @@ public class Driver {
     private String address;
     private String birthdate;
     private int age;   // stores the driver's current age
-
+ 
     // the four licence types
     private static final String[] VALID_LICENSES =
             {"Light", "Medium", "Heavy", "PublicTransport"};
