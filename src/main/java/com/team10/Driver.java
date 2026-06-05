@@ -12,11 +12,13 @@ public class Driver {
     private String licenseType;
     private String address;
     private String birthdate;
-    private int age;
+    private int age;   // stores the driver's current age
 
+    // the four licence types
     private static final String[] VALID_LICENSES =
             {"Light", "Medium", "Heavy", "PublicTransport"};
 
+    // Constructor, Validates all fields before storing them.
     public Driver(String driverID, String name, String birthdate, int experienceYears,
                   String licenseType, String address) {
 
@@ -45,13 +47,15 @@ public class Driver {
         this.experienceYears = experienceYears;
         this.licenseType = licenseType;
         this.address = address;
-        this.age = calculateAge();
+        this.age = calculateAge();   
     }
 
+    // Calculates the exact age using today's date.
     public int calculateAge() {
         return getAge(this.birthdate, LocalDate.now());
     }
 
+    // Validates the driver ID.
     public static boolean isValidDriverID(String id) {
         if (id == null || id.length() != 10) return false;
 
@@ -74,6 +78,7 @@ public class Driver {
         return true;
     }
 
+    // Validates that experience is not negative and not more than (age minus 18).
     public static boolean isValidExperience(int experienceYears, String birthdate) {
         if (birthdate == null) return false;
         if (experienceYears < 0) return false;
@@ -87,6 +92,7 @@ public class Driver {
         }
     }
 
+    // Address must have exactly five separated parts, none empty.
     public static boolean isValidAddress(String address) {
         if (address == null) return false;
 
@@ -99,6 +105,7 @@ public class Driver {
         return true;
     }
 
+    // Birthdate must be in dd MM yyyy format with strict validation.
     public static boolean isValidBirthdate(String birthdate) {
         if (birthdate == null) return false;
 
@@ -113,6 +120,7 @@ public class Driver {
         }
     }
 
+    // Checks that the licence type is one of the four predefined values.
     public static boolean isValidLicenseType(String licenseType) {
         if (licenseType == null) return false;
         for (String v : VALID_LICENSES) {
@@ -121,12 +129,14 @@ public class Driver {
         return false;
     }
 
+    // Utility method to calculate exact age from a birthdate and a reference date.
     public static int getAge(String birthdate, LocalDate today) {
         DateTimeFormatter fmt = DateTimeFormatter.ofPattern("dd-MM-yyyy");
         LocalDate dob = LocalDate.parse(birthdate, fmt);
         return Period.between(dob, today).getYears();
     }
 
+    // Getters
     public String getDriverID() {
         return driverID;
     }
@@ -155,6 +165,7 @@ public class Driver {
         return age;
     }
 
+    // Serialisation format used by DriverRepository. Fields separated by commas.
     @Override
     public String toString() {
         return driverID + "," + name + "," + experienceYears + ","

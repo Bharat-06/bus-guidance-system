@@ -10,11 +10,13 @@ public class DriverRepository {
     public static final Path FILE_PATH = Paths.get("drivers.txt");
     private static final int FIELD_COUNT = 6;
 
+    // Adds a driver to the file. Rejects null, duplicate driver IDs, and any driver that fails constructor validation.
     public boolean add(Driver driver) {
         if (driver == null) {
             System.out.println("Driver cannot be null");
             return false;
         }
+        // Driver ID must be unique across all stored drivers
         if (retrieve(driver.getDriverID()) != null) {
             System.out.println("D1: A driver with ID '" + driver.getDriverID() + "' already exists.");
             return false;
@@ -33,6 +35,7 @@ public class DriverRepository {
         return true;
     }
 
+    // Finds a driver by ID, or returns null if not found.
     public Driver retrieve(String driverID) {
         if (driverID == null || driverID.isEmpty()) return null;
         for (String line : readAllLines()) {
@@ -45,6 +48,7 @@ public class DriverRepository {
         return null;
     }
 
+    // Returns a list of all valid drivers currently stored in the file.
     public List<Driver> retrieveAll() {
         List<Driver> drivers = new ArrayList<>();
         for (String line : readAllLines()) {
@@ -55,6 +59,8 @@ public class DriverRepository {
         return drivers;
     }
 
+    // Updates mutable fields of an existing driver. Returns true on success, false on failure.
+    // Parameters that are null stay unchanged. 
     public boolean update(String driverID, Integer newExperience, String newLicenseType,
                           String newAddress, String newBirthdate) {
         List<String> lines = readAllLines();
@@ -65,6 +71,7 @@ public class DriverRepository {
             Driver existing = deserialise(line);
             if (existing == null || !existing.getDriverID().equals(driverID)) continue;
 
+            // Determine final values: use the new value if provided, otherwise keep the existing one
             int finalExperience;
             if (newExperience != null) {
                 finalExperience = newExperience;
@@ -93,17 +100,20 @@ public class DriverRepository {
                 finalBirthdate = existing.getBirthdate();
             }
 
+            // Reject negative experience values
             if (finalExperience < 0) {
                 System.out.println("Experience cannot be negative.");
                 return false;
             }
 
+            // Cannot change licence type if the driver has more than 10 years of experience
             if (newLicenseType != null && !newLicenseType.equals(existing.getLicenseType())
                     && existing.getExperienceYears() > 10) {
                 System.out.println("D4: Cannot change license type when experience exceeds 10 years.");
                 return false;
             }
 
+            // Create the updated driver – the constructor will validate all fields
             try {
                 Driver updated = new Driver(
                         existing.getDriverID(),
@@ -129,6 +139,7 @@ public class DriverRepository {
         return true;
     }
 
+    // Counts how many valid driver records are in the file.
     public int count() {
         int count = 0;
         for (String line : readAllLines()) {
@@ -137,6 +148,7 @@ public class DriverRepository {
         return count;
     }
 
+    // Reads all lines from the drivers file. Returns an empty list if the file does not exist.
     private List<String> readAllLines() {
         try {
             if (!Files.exists(FILE_PATH)) return new ArrayList<>();
@@ -146,6 +158,7 @@ public class DriverRepository {
         }
     }
 
+    // Writes the given list of lines back to the drivers file, overwriting the previous content.
     private void writeAllLines(List<String> lines) {
         try {
             Files.write(FILE_PATH, lines, StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING);
@@ -154,10 +167,12 @@ public class DriverRepository {
         }
     }
 
+    // Converts a Driver object to a comma‑separated string for file storage.
     private String serialise(Driver driver) {
         return driver.toString();
     }
 
+    // Reconstructs a Driver object from a comma‑separated line read from the file.
     private Driver deserialise(String line) {
         if (line == null || line.trim().isEmpty()) return null;
         String[] parts = line.split(",", FIELD_COUNT);
