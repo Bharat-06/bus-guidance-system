@@ -127,51 +127,10 @@ public class BusTest {
         assertDoesNotThrow(() -> new Bus("12345678", 80, 0, "Diesel", null));
     }
 
-
-    // Negative fuel level should be rejected, in this case -1.0
-    @Test
-    void B3_TC1_negativeFuelLevel() {
-        System.out.println("Test: B3 TC1");
-         assertThrows(IllegalArgumentException.class, () -> {
-            new Bus("12345678", 40, -1.0, "Diesel", null);
-            });
-    }
-
-    // Fuel level of 0 should pass
-    @Test
-    void B3_TC2_zeroFuelLevel() {
-        System.out.println("Test: B3 TC2");
-        assertDoesNotThrow(() -> new Bus("12345678", 40, 0, "Diesel", null));
-    }
-
-    // Fuel level of 600 should be accepted
-    @Test
-    void B3_TC3_fuelLevelMax() {
-        System.out.println("Test: B3 TC3");
-        assertDoesNotThrow(() -> new Bus("12345678", 40, 600.0, "Diesel", null));
-    }
-
-    // Fuel level above max 600 should be rejected, in this case 601
-    @Test
-    void B3_TC4_overMaxFuelLevel() {
-        System.out.println("Test: B3 TC4");
-         assertThrows(IllegalArgumentException.class, () -> {
-            new Bus("12345678", 40, 601.0, "Diesel", null);
-            });
-    }
-
-    // entering water as a fuel type should fail
-    @Test
-    void B4_TC1_invalidFuelType() {
-        System.out.println("Test: B4 TC1");
-        assertThrows(IllegalArgumentException.class, () -> {
-             new Bus("12345678", 40, 0.8, "Water", null);
-             });
-    }
     
     // Driver aged 46 can drive a bus with capacity 60
     @Test
-    void B3_TC1_driverUnder50_highCapacityBus_shouldAssign() {
+    void B3_TC1_under50HighCapacity() {
         Bus bus = new Bus("12345678", 60, 300.0, "Diesel");
         Driver driver = new Driver("23@#abcdAB", "Alice", "10-05-1980", 5, "Heavy", "12|Main St|Melbourne|VIC|Australia");
         assertTrue(bus.assignDriver(driver));
@@ -179,7 +138,7 @@ public class BusTest {
 
     // Driver aged 56 on a bus with capacity exactly 50 should fail
     @Test
-    void B3_TC2_driverOver50_capacityAtLimit_shouldFail() {
+    void B3_TC2_driverOver50CapacityExact50Capacity() {
         Bus bus = new Bus("12345678", 50, 300.0, "Diesel");
         Driver driver = new Driver("23@#abcdAB", "Bob", "10-05-1970", 10, "Heavy", "12|Main St|Melbourne|VIC|Australia");
         assertFalse(bus.assignDriver(driver));
@@ -187,7 +146,7 @@ public class BusTest {
     
     // Driver aged 56 on a bus with capacity 49 should be allowed
     @Test
-    void B3_TC3_driverOver50_capacityJustBelow50_shouldAssign() {
+    void B3_TC3_driverOver50capacityJustBelow50() {
         Bus bus = new Bus("12345678", 49, 300.0, "Diesel");
         Driver driver = new Driver("23@#abcdAB", "Carol", "10-05-1970", 10, "Heavy", "12|Main St|Melbourne|VIC|Australia");
         assertTrue(bus.assignDriver(driver));
@@ -196,7 +155,7 @@ public class BusTest {
 
     // Driver with 5 years experience can drive electric bus
     @Test
-    void B4_TC1_fiveYearsExperience_electricBus_shouldAssign() {
+    void B4_TC1_fiveYearsExperienceElectricBus() {
         Bus bus = new Bus("12345678", 40, 300.0, "Electricity");
         Driver driver = new Driver("23@#abcdAB", "Alice", "10-05-1990", 5, "Heavy", "12|Main St|Melbourne|VIC|Australia");
         assertTrue(bus.assignDriver(driver));
@@ -204,7 +163,7 @@ public class BusTest {
     
     // Driver with only 4 years experience on electric bus should fail
     @Test
-    void B4_TC2_fourYearsExperience_electricBus_shouldFail() {
+    void B4_TC2_fourYearsExperienceElectricBus() {
         Bus bus = new Bus("12345678", 40, 300.0, "Electricity");
         Driver driver = new Driver("23@#abcdAB", "Dave", "10-05-1990", 4, "Heavy", "12|Main St|Melbourne|VIC|Australia");
         assertFalse(bus.assignDriver(driver));
@@ -212,21 +171,21 @@ public class BusTest {
     
     // Experience restriction only applies to electric, not diesel
     @Test
-    void B4_TC3_twoYearsExperience_dieselBus_shouldAssign() {
+    void B4_TC3_twoYearsExperienceDieselBus() {
         Bus bus = new Bus("12345678", 40, 300.0, "Diesel");
         Driver driver = new Driver("23@#abcdAB", "Eve", "10-05-1995", 2, "Light", "12|Main St|Melbourne|VIC|Australia");
         assertTrue(bus.assignDriver(driver));
     }
     // Normal: Heavy licence on electric bus should succeed
     @Test
-    void B5_TC1_heavyLicence_electricBus_shouldAssign() {
+    void B5_TC1_heavyLicenceElectricBus() {
         Bus bus = new Bus("12345678", 40, 300.0, "Electricity");
         Driver driver = new Driver("23@#abcdAB", "Frank", "10-05-1985", 10, "Heavy", "12|Main St|Melbourne|VIC|Australia");
         assertTrue(bus.assignDriver(driver));
     }
     // PublicTransport licence on hybrid bus should succeed
     @Test
-    void B5_TC2_publicTransportLicence_hybridBus_shouldAssign() {
+    void B5_TC2_publicTransportLicenceHybridBus() {
         Bus bus = new Bus("12345678", 40, 300.0, "Hybrid");
         Driver driver = new Driver("23@#abcdAB", "Grace", "10-05-1985", 10, "PublicTransport", "12|Main St|Melbourne|VIC|Australia");
         assertTrue(bus.assignDriver(driver));
@@ -234,7 +193,7 @@ public class BusTest {
 
     // Light licence on hybrid bus should fail
     @Test
-    void B5_TC3_lightLicence_hybridBus_shouldFail() {
+    void B5_TC3_lightLicenceHybridBus() {
         Bus bus = new Bus("12345678", 40, 300.0, "Hybrid");
         Driver driver = new Driver("23@#abcdAB", "Hank", "10-05-1990", 5, "Light", "12|Main St|Melbourne|VIC|Australia");
         assertFalse(bus.assignDriver(driver));
@@ -242,7 +201,7 @@ public class BusTest {
 
     // Medium licence on electric bus should fail 
     @Test
-    void B5_TC4_mediumLicence_electricBus_shouldFail() {
+    void B5_TC4_mediumLicenceElectricBus() {
         Bus bus = new Bus("12345678", 40, 300.0, "Electricity");
         Driver driver = new Driver("23@#abcdAB", "Iris", "10-05-1990", 5, "Medium", "12|Main St|Melbourne|VIC|Australia");
         assertFalse(bus.assignDriver(driver));
@@ -250,10 +209,52 @@ public class BusTest {
 
     // Licence restriction does not apply to diesel buses
     @Test
-    void B5_TC5_lightLicence_dieselBus_shouldAssign() {
+    void B5_TC5_lightLicenceDieselBus() {
         Bus bus = new Bus("12345678", 40, 300.0, "Diesel");
         Driver driver = new Driver("23@#abcdAB", "Jack", "10-05-1990", 5, "Light", "12|Main St|Melbourne|VIC|Australia");
         assertTrue(bus.assignDriver(driver));
     }
+
+    // CREATED B6 AS A FUEL CONDITION
+
+    // Negative fuel level should be rejected, in this case -1.0
+    @Test
+    void B6_TC1_negativeFuelLevel() {
+        System.out.println("Test: B3 TC1");
+         assertThrows(IllegalArgumentException.class, () -> {
+            new Bus("12345678", 40, -1.0, "Diesel", null);
+            });
+    }
+
+    // Fuel level of 0 should pass
+    @Test
+    void B6_TC2_zeroFuelLevel() {
+        System.out.println("Test: B3 TC2");
+        assertDoesNotThrow(() -> new Bus("12345678", 40, 0, "Diesel", null));
+    }
+
+    // Fuel level of 600 should be accepted
+    @Test
+    void B6_TC3_fuelLevelMax() {
+        System.out.println("Test: B3 TC3");
+        assertDoesNotThrow(() -> new Bus("12345678", 40, 600.0, "Diesel", null));
+    }
+
+    // Fuel level above max 600 should be rejected, in this case 601
+    @Test
+    void B6_TC4_overMaxFuelLevel() {
+        System.out.println("Test: B3 TC4");
+         assertThrows(IllegalArgumentException.class, () -> {
+            new Bus("12345678", 40, 601.0, "Diesel", null);
+            });
+    }
+
+    // entering water as a fuel type should fail
+    @Test
+    void B6_TC5_invalidFuelType() {
+        System.out.println("Test: B4 TC1");
+        assertThrows(IllegalArgumentException.class, () -> {
+             new Bus("12345678", 40, 0.8, "Water", null);
+             });
+    }
 }
- 
